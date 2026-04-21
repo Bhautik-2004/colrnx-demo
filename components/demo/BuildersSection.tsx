@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 const builders = [
   {
     name: "Vashisht Brahmbhatt",
-    title: "202302626010154 | AIML Track",
+    title: "202302626010156 | AIML Track",
     sem: "Semester 6",
     thought:
       "Don’t just learn the stack - build something that proves you understand it.",
@@ -23,7 +23,7 @@ const builders = [
   },
   {
     name: "Bhautik Vaghamshi",
-    title: "202302626010156 | AIML Track",
+    title: "202302626010154 | AIML Track",
     sem: "Semester 6",
     thought: "Productivity is measured by what you build, not what you plan.",
     photo: "/builders/bhautik-vaghamshi.jpg",
