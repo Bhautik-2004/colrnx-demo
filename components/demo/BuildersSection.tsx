@@ -5,6 +5,8 @@ import { motion } from "framer-motion"
 const builders = [
   {
     name: "Vashisht Brahmbhatt",
+    title: "202302626010154 | AIML Track",
+    sem: "Semester 6",
     thought:
       "Don’t just learn the stack - build something that proves you understand it.",
     photo: "/builders/vashisht-brahmbhatt.jpg",
@@ -12,6 +14,8 @@ const builders = [
   },
   {
     name: "Daksh Patel",
+    title: "202302626010099 | AIML Track",
+    sem: "Semester 6",
     thought:
       "The fastest way to grow is to build with people who challenge you.",
     photo: "/builders/daksh-patel.jpg",
@@ -19,6 +23,8 @@ const builders = [
   },
   {
     name: "Bhautik Vaghamshi",
+    title: "202302626010156 | AIML Track",
+    sem: "Semester 6",
     thought: "Productivity is measured by what you build, not what you plan.",
     photo: "/builders/bhautik-vaghamshi.jpg",
     linkedin: "https://www.linkedin.com/in/bhautik2004"
@@ -105,6 +111,14 @@ export default function BuildersSection() {
                   <p className="mt-3 text-lg leading-relaxed text-orange-600 italic">
                     "{builder.thought}"
                   </p>
+                  <div className="mt-auto flex flex-col gap-1 pt-4">
+                    <p className="text-xs font-semibold tracking-widest text-zinc-500 uppercase">
+                      {builder.sem}
+                    </p>
+                    <p className="text-sm font-semibold tracking-widest text-zinc-400 uppercase">
+                      {builder.title}
+                    </p>
+                  </div>
                 </div>
               </article>
             )
