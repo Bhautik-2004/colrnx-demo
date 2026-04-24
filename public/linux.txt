@@ -1,0 +1,631 @@
+#########################
+Student Management System
+#########################
+
+
+//---------------
+//main.dart
+//---------------
+
+import 'package:flutter/material.dart';
+import 'login_page1.dart';
+
+void main() => runApp(MyApp());
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: LoginPage(),
+    );
+  }
+}
+
+
+//---------------
+//student1.dart
+//---------------
+
+class Student {
+  String name;
+  String rollNo;
+  String age;
+  Student({required this.name, required this.rollNo, required this.age});
+}
+
+//---------------
+//login_page1.dart
+//---------------
+
+import 'package:flutter/material.dart';
+import 'home_page1.dart';
+
+class LoginPage extends StatelessWidget {
+  final TextEditingController uc = TextEditingController();
+  final TextEditingController pc = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Login Page"),),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: uc,
+              decoration: InputDecoration(labelText: 'Username'),
+            ),
+
+            TextField(
+              controller: pc,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+
+            SizedBox(height: 20,),
+            
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(username: uc.text)));
+              },
+              child: Text('Login'),
+            )
+          ],
+        ),
+        ),
+    );
+  }
+}
+
+
+//---------------
+//home_page1.dart
+//---------------
+
+import 'package:flutter/material.dart';
+import 'student1.dart';
+import 'search_page1.dart';
+
+class HomePage extends StatefulWidget {
+  final String username;
+  HomePage({required this.username});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Student> students = [];
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController rollNoController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+
+  void addStudent() {
+    if (nameController.text.isNotEmpty && rollNoController.text.isNotEmpty && ageController.text.isNotEmpty) {
+      setState(() {
+        students.add(Student(name: nameController.text, rollNo: rollNoController.text, age: ageController.text));
+
+        nameController.clear();
+        rollNoController.clear();
+        ageController.clear();
+      });
+    }
+  }
+
+  void deleteStudent(int index) {
+    setState(() {
+      students.removeAt(index);
+    });
+  }
+
+  void editStudent(int index) {
+    nameController.text = students[index].name;
+    rollNoController.text = students[index].rollNo;
+    ageController.text = students[index].age;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Welcome, ${widget.username}'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage(students: students)));
+              },
+              icon: Icon(Icons.search),
+            ),
+          ),
+        ],
+        ),
+      
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name'),),
+            TextField(controller: rollNoController, decoration: InputDecoration(labelText: 'Roll No.'),),
+            TextField(controller: ageController, decoration: InputDecoration(labelText: 'Age'),),
+            
+            SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: addStudent,
+              child: Text('Add Student')
+            ),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(students[index].name),
+                  subtitle: Text('Roll No.: ${students[index].rollNo}, Age: ${students[index].age}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(onPressed: () => editStudent(index), icon: Icon(Icons.edit)),
+                      IconButton(onPressed: () => deleteStudent(index), icon: Icon(Icons.delete))
+                    ],
+                  ),
+                ),
+              )
+            )
+          ],
+        ),
+        ),
+    );
+  }
+}
+
+
+//---------------
+//search_page1.dart
+//---------------
+
+import 'package:flutter/material.dart';
+import 'student1.dart';
+
+class SearchPage extends StatefulWidget  {
+  final List<Student> students;
+  SearchPage({required this.students});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  List<Student> filteredStudents = [];
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredStudents = List.from(widget.students);
+  }
+
+  void searchStudent() {
+    String query = searchController.text.trim().toLowerCase();
+
+    setState(() {
+      if (query.isEmpty) {
+        filteredStudents = List.from(widget.students);
+      } else {
+        filteredStudents = widget.students
+            .where((student) => student.name.toLowerCase().contains(query))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Search Student"),),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: searchController,
+              decoration: InputDecoration(labelText: "Search by name"),
+              onChanged: (value) => searchStudent(),
+            ),
+
+            SizedBox(height: 20,),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredStudents.length,
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(filteredStudents[index].name),
+                  subtitle: Text('Roll No ${filteredStudents[index].rollNo}, Age: ${filteredStudents[index].age}'),
+                ),
+                ),
+            ),
+          ],
+        ), 
+        ),
+    );
+  }
+}
+
+
+
+
+##########################
+Employee Management System
+##########################
+
+//----------------
+//main.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'login_page.dart';
+
+void main() => runApp(MyApp());
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: LoginPage(),
+    );
+  }
+}
+
+
+//----------------
+//employee.dart
+//----------------
+
+class Employee {
+  String name;
+  String id;
+  String salary;
+
+  Employee({required this.name, required this.id, required this.salary});
+}
+
+
+//----------------
+//login_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'home_page.dart';
+
+class LoginPage extends StatelessWidget {
+  final TextEditingController uc = TextEditingController();
+  final TextEditingController pc = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Login")),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(controller: uc, decoration: InputDecoration(labelText: "Username")),
+            TextField(controller: pc, decoration: InputDecoration(labelText: "Password"), obscureText: true),
+
+            SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () {
+                if (uc.text == "admin" && pc.text == "12345") {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => HomePage(),
+                  ));
+                } else {
+                  print("Invalid Login");
+                }
+              },
+              child: Text("Login"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+//----------------
+//home_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+import 'add_page.dart';
+import 'show_page.dart';
+import 'search_page.dart';
+import 'update_page.dart';
+import 'delete_page.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Employee> employees = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Home")),
+
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(child: Text("Menu")),
+            ListTile(title: Text("Profile")),
+            ListTile(title: Text("Settings")),
+            ListTile(title: Text("Help")),
+            ListTile(title: Text("Logout")),
+          ],
+        ),
+      ),
+
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => AddPage(employees))),
+            child: Text("Add"),
+          ),
+
+          ElevatedButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => ShowPage(employees))),
+            child: Text("Show"),
+          ),
+
+          ElevatedButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => SearchPage(employees))),
+            child: Text("Search"),
+          ),
+
+          ElevatedButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => UpdatePage(employees))),
+            child: Text("Update"),
+          ),
+
+          ElevatedButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => DeletePage(employees))),
+            child: Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+//----------------
+//add_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+
+class AddPage extends StatefulWidget {
+  final List<Employee> employees;
+  AddPage(this.employees);
+
+  @override
+  State<AddPage> createState() => _AddPageState();
+}
+
+class _AddPageState extends State<AddPage> {
+  TextEditingController name = TextEditingController();
+  TextEditingController id = TextEditingController();
+  TextEditingController salary = TextEditingController();
+
+  void add() {
+    setState(() {
+
+      if (name.text.isNotEmpty && id.text.isNotEmpty && salary.text.isNotEmpty) {
+        widget.employees.add(Employee(
+          name: name.text,
+          id: id.text,
+          salary: salary.text,
+        ));
+      }
+      
+      name.clear();
+      id.clear();
+      salary.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Add Employee")),
+      body: Column(
+        children: [
+          TextField(controller: name, decoration: InputDecoration(labelText: "Name")),
+          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
+          TextField(controller: salary, decoration: InputDecoration(labelText: "Salary")),
+
+          ElevatedButton(onPressed: add, child: Text("Add"))
+        ],
+      ),
+    );
+  }
+}
+
+
+//----------------
+//show_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+
+class ShowPage extends StatelessWidget {
+  final List<Employee> employees;
+  ShowPage(this.employees);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("All Employees")),
+      body: ListView.builder(
+        itemCount: employees.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(employees[index].name),
+            subtitle: Text("ID: ${employees[index].id}, Salary: ${employees[index].salary}"),
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+//----------------
+//search_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+
+class SearchPage extends StatefulWidget {
+  final List<Employee> employees;
+  SearchPage(this.employees);
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  TextEditingController search = TextEditingController();
+  List<Employee> result = [];
+
+  void doSearch() {
+    setState(() {
+      result = widget.employees
+          .where((e) => e.id.contains(search.text))
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Search")),
+      body: Column(
+        children: [
+          TextField(controller: search, onChanged: (_) => doSearch()),
+          Expanded(
+            child: ListView.builder(
+              itemCount: result.length,
+              itemBuilder: (context, i) => ListTile(
+                title: Text(result[i].name),
+                subtitle: Text(result[i].id),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+//----------------
+//update_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+
+class UpdatePage extends StatefulWidget {
+  final List<Employee> employees;
+  UpdatePage(this.employees);
+
+  @override
+  State<UpdatePage> createState() => _UpdatePageState();
+}
+
+class _UpdatePageState extends State<UpdatePage> {
+  TextEditingController id = TextEditingController();
+  TextEditingController name = TextEditingController();
+  TextEditingController salary = TextEditingController();
+
+  void update() {
+    for (var e in widget.employees) {
+      if (e.id == id.text) {
+        setState(() {
+          e.name = name.text;
+          e.salary = salary.text;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Update")),
+      body: Column(
+        children: [
+          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
+          TextField(controller: name, decoration: InputDecoration(labelText: "New Name")),
+          TextField(controller: salary, decoration: InputDecoration(labelText: "New Salary")),
+
+          ElevatedButton(onPressed: update, child: Text("Update"))
+        ],
+      ),
+    );
+  }
+}
+
+
+//----------------
+//delete_page.dart
+//----------------
+
+import 'package:flutter/material.dart';
+import 'employee.dart';
+
+class DeletePage extends StatefulWidget {
+  final List<Employee> employees;
+  DeletePage(this.employees);
+
+  @override
+  State<DeletePage> createState() => _DeletePageState();
+}
+
+class _DeletePageState extends State<DeletePage> {
+  TextEditingController id = TextEditingController();
+
+  void delete() {
+    setState(() {
+      widget.employees.removeWhere((e) => e.id == id.text);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Delete")),
+      body: Column(
+        children: [
+          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
+          ElevatedButton(onPressed: delete, child: Text("Delete"))
+        ],
+      ),
+    );
+  }
+}
