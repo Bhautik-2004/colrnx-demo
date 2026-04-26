@@ -1,750 +1,1243 @@
-#########################
-Student Management System
-#########################
+================================================================================
+Section 1: Classification — Iris Dataset
+================================================================================
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+# Load dataset
+df = pd.read_csv('/content/sample_data/iris.csv')
+print(df.head())
+
+# Check class distribution
+print("\nCount of each species:")
+print(df['species'].value_counts())
+
+# Split X and Y using column names
+x = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']].values
+y = df['species'].values
+# .values - To convert Pandas data into NumPy array format.
+
+# Convert categorical to numerical
+labelencoder_y = LabelEncoder()
+y = labelencoder_y.fit_transform(y)
+
+# Train-Test Split
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.2, random_state=42
+)
 
 
-//---------------
-//main.dart
-//---------------
+================================================================================
+SVC (Support Vector Classifier)
+================================================================================
 
-import 'package:flutter/material.dart';
-import 'login_page1.dart';
+from sklearn.svm import SVC
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
-void main() => runApp(MyApp());
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginPage(),
-    );
-  }
+# Apply SVC
+classifier_svc = SVC(kernel='linear')  # You can use 'rbf' also
+classifier_svc.fit(x_train, y_train)
+
+# Prediction  ← fixed: y_pred line was missing in original
+y_pred = classifier_svc.predict(x_test)
+
+# Evaluation
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:\n", cm)
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+precision = precision_score(y_test, y_pred, average='macro')
+print("Precision:", precision)
+recall = recall_score(y_test, y_pred, average='macro')
+print("Recall:", recall)
+f1 = f1_score(y_test, y_pred, average='macro')
+print("F1 Score:", f1)
+
+
+================================================================================
+Naive Bayes (GaussianNB)
+================================================================================
+
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+
+classifier_nb = GaussianNB()
+classifier_nb.fit(x_train, y_train)
+
+# Prediction
+y_pred = classifier_nb.predict(x_test)
+print("\nPredicted Output:\n", y_pred)
+
+# Evaluation
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:\n", cm)
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+precision = precision_score(y_test, y_pred, average='macro')
+print("Precision:", precision)
+recall = recall_score(y_test, y_pred, average='macro')
+print("Recall:", recall)
+f1 = f1_score(y_test, y_pred, average='macro')
+print("F1 Score:", f1)
+
+
+================================================================================
+Decision Tree Classifier
+================================================================================
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+
+# Create Decision Tree model
+classifier_dt = DecisionTreeClassifier(random_state=42)
+classifier_dt.fit(x_train, y_train)
+
+# Prediction
+y_pred = classifier_dt.predict(x_test)
+print("Predicted Output:\n", y_pred)
+
+# Evaluation
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:\n", cm)
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+precision = precision_score(y_test, y_pred, average='macro')
+print("Precision:", precision)
+recall = recall_score(y_test, y_pred, average='macro')
+print("Recall:", recall)
+f1 = f1_score(y_test, y_pred, average='macro')
+print("F1 Score:", f1)
+
+
+================================================================================
+KNN Classifier
+================================================================================
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+
+# Create KNN model
+classifier_knn = KNeighborsClassifier(n_neighbors=5)
+classifier_knn.fit(x_train, y_train)
+
+# Prediction
+y_pred = classifier_knn.predict(x_test)
+print("Predicted Output:\n", y_pred)
+
+# Evaluation
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:\n", cm)
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+precision = precision_score(y_test, y_pred, average='macro')
+print("Precision:", precision)
+recall = recall_score(y_test, y_pred, average='macro')
+print("Recall:", recall)
+f1 = f1_score(y_test, y_pred, average='macro')
+print("F1 Score:", f1)
+
+
+================================================================================
+Section 2: Regression — Housing Dataset
+================================================================================
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load dataset
+df = pd.read_csv("/content/sample_data/Housing.csv")
+
+# Features and target
+X = df[['area', 'bedrooms', 'bathrooms', 'stories', 'mainroad',
+        'guestroom', 'basement', 'hotwaterheating', 'airconditioning',
+        'parking', 'prefarea']]
+Y = df['price']  # Target variable
+# OR:
+# X = df.drop("price", axis=1)   # axis=0 → rows, axis=1 → columns
+# y = df["price"]
+
+# Convert categorical variables to numeric
+X = pd.get_dummies(X, drop_first=True)  # One-hot encoding for categorical variables
+X = pd.get_dummies(X, drop_first=True).astype(int)
+
+# Split Training 70%, Testing 30%
+X_train, X_test, y_train, y_test = train_test_split(
+    X, Y, test_size=0.30, random_state=42
+)
+
+
+================================================================================
+Linear Regression
+================================================================================
+
+# Train model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Evaluation
+mse  = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2   = r2_score(y_test, y_pred)
+print("Linear Regression Results")
+print("MSE :", mse)
+print("RMSE:", rmse)
+print("R2  :", r2)
+
+# OR (alternative evaluation with MAE and MAPE):
+# mae  = mean_absolute_error(y_test, y_pred)
+# mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+# print(f"Mean Absolute Error (MAE): {mae:.2f}")
+# print(f"Mean Squared Error (MSE): {mse:.2f}")
+# print(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
+# print(f"R-squared Score (R2): {r2:.4f}")
+# print(f"Mean Absolute Percentage Error (MAPE): {mape:.2f}%")
+
+
+================================================================================
+Decision Tree Regressor
+================================================================================
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+# Initialize and train Decision Tree model
+dt_model = DecisionTreeRegressor()
+dt_model.fit(X_train, y_train)
+
+# Prediction
+dt_pred = dt_model.predict(X_test)
+
+# Evaluation
+mse  = mean_squared_error(y_test, dt_pred)
+rmse = np.sqrt(mse)
+r2   = r2_score(y_test, dt_pred)
+print("Decision Tree Regressor Results")
+print("MSE :", mse)
+print("RMSE:", rmse)
+print("R2  :", r2)
+
+
+================================================================================
+Random Forest Regressor
+================================================================================
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+# Initialize and train Random Forest Regressor
+rf_model = RandomForestRegressor()
+rf_model.fit(X_train, y_train)
+
+# Make predictions
+y_pred_rf = rf_model.predict(X_test)
+
+# Evaluate model
+mse_rf = mean_squared_error(y_test, y_pred_rf)
+print("Random Forest Regression Mean Squared Error:", mse_rf)
+
+
+================================================================================
+KNN Regressor
+================================================================================
+
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_squared_error
+
+knn_model = KNeighborsRegressor(n_neighbors=5)
+knn_model.fit(X_train, y_train)
+y_pred = knn_model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+print("KNN Regression MSE:", mse)
+
+
+================================================================================
+Section 3: Logistic Regression — Housing Dataset
+================================================================================
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, accuracy_score
+
+df = pd.read_csv("/content/sample_data/Housing.csv")
+
+# Convert price into binary category using median
+median_price = df["price"].median()
+df["Price_Category"] = (df["price"] > median_price).astype(int)
+# If a house price is greater than the median → TRUE : 1 (High price)
+# Otherwise → FALSE: 0 (Low price)
+
+X = df.drop(columns=["price", "Price_Category"])
+y = df["Price_Category"]
+
+# Convert all categorical columns into numeric
+X = pd.get_dummies(X, drop_first=True)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train Logistic Regression model
+logmodel = LogisticRegression()
+logmodel.fit(X_train, y_train)
+
+# Predict
+y_pred = logmodel.predict(X_test)
+
+# Evaluation
+conf_matrix = confusion_matrix(y_test, y_pred)
+accuracy    = accuracy_score(y_test, y_pred)
+print("Confusion Matrix:\n", conf_matrix)
+print("Accuracy:", accuracy)
+
+
+================================================================================
+Section 4: Ensemble Methods — Classifiers
+================================================================================
+
+
+================================================================================
+Bagging Classifier (Simple Prediction)
+================================================================================
+
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+# Data
+X = [[1], [2], [3], [4], [5]]  # Study Hours
+y = [0, 0, 1, 1, 1]            # 0 = Fail, 1 = Pass
+
+# Bagging Model
+model = BaggingClassifier(DecisionTreeClassifier(), n_estimators=5)
+
+# Train
+model.fit(X, y)
+
+# Prediction - If a student studies 2 hours, will they Pass or Fail?
+print(model.predict([[2]]))  # Predict for 2 hours study
+
+
+================================================================================
+Bagging Classifier (With Accuracy)
+================================================================================
+
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+# Data
+X = [[1], [2], [3], [4], [5]]   # Study Hours
+y = [0, 0, 1, 1, 1]             # 0 = Fail, 1 = Pass
+
+# Bagging Model
+model = BaggingClassifier(DecisionTreeClassifier(), n_estimators=5)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+y_pred = model.predict(X)
+
+# Accuracy
+accuracy = accuracy_score(y, y_pred)
+print("Accuracy:", accuracy)
+
+# Test Prediction
+print("Prediction for 2 hours study:", model.predict([[2]]))
+
+
+================================================================================
+AdaBoost Classifier
+================================================================================
+
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+# Data
+X = [[1], [2], [3], [4], [5]]
+y = [0, 0, 1, 1, 1]
+
+# Boosting Model
+model = AdaBoostClassifier(
+    DecisionTreeClassifier(max_depth=1),  # Only 1 split in tree
+    n_estimators=5                         # 5 decision trees will be created.
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[4]]))
+
+
+================================================================================
+Gradient Boosting Classifier
+================================================================================
+
+from sklearn.ensemble import GradientBoostingClassifier
+
+# Data
+X = [[1], [2], [3], [4], [5], [6]]
+y = [0, 0, 1, 1, 1, 0]
+
+# Gradient Boosting Model
+# learning_rate=1 → Learn fast | 0.1 → Learn slowly | 0.01 → Learn very slowly
+model = GradientBoostingClassifier(
+    n_estimators=5,
+    learning_rate=0.1
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[5]]))
+
+
+================================================================================
+XGBoost Classifier
+================================================================================
+
+from xgboost import XGBClassifier
+
+# Data
+X = [[1], [2], [3], [4], [5], [6]]
+y = [0, 0, 1, 1, 1, 0]
+
+# XGBoost Model
+model = XGBClassifier(
+    n_estimators=5,
+    learning_rate=0.1
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[3]]))
+
+
+================================================================================
+Stacking Classifier
+================================================================================
+
+from sklearn.ensemble import StackingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+
+# Sample Data
+X = [[1], [2], [3], [4], [5], [6], [7], [8]]  # Study Hours
+y = [0, 0, 1, 1, 1, 0, 1, 1]                   # 0 = Fail, 1 = Pass
+
+# Base models
+models = [
+    ('dt', DecisionTreeClassifier()),
+    ('lr', LogisticRegression())
+]
+
+# Stacking model
+model = StackingClassifier(
+    estimators=models,
+    final_estimator=LogisticRegression()
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[4]]))
+
+
+================================================================================
+Section 5: Ensemble Methods — Regressors
+================================================================================
+
+
+================================================================================
+AdaBoost Regressor
+================================================================================
+
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.tree import DecisionTreeRegressor
+
+# Data
+X = [[1], [2], [3], [4], [5], [6]]
+y = [100, 150, 200, 250, 300, 350]
+
+# Model
+model = AdaBoostRegressor(
+    DecisionTreeRegressor(max_depth=1),
+    n_estimators=5
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[4]]))
+
+
+================================================================================
+Gradient Boosting Regressor
+================================================================================
+
+from sklearn.ensemble import GradientBoostingRegressor
+
+# Data
+X = [[1], [2], [3], [4], [5], [6]]
+y = [100, 150, 200, 250, 300, 350]
+
+# Model
+model = GradientBoostingRegressor(
+    n_estimators=5,
+    learning_rate=0.1,
+    max_depth=2
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[5]]))
+
+
+================================================================================
+XGBoost Regressor
+================================================================================
+
+from xgboost import XGBRegressor
+
+# Data
+X = [[1], [2], [3], [4], [5], [6]]  # HOUSE SIZE
+y = [100, 150, 200, 250, 300, 350]  # PRICE
+
+# Model
+model = XGBRegressor(
+    n_estimators=5,
+    learning_rate=0.1,
+    max_depth=2
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[3]]))
+
+
+================================================================================
+Stacking Regressor (Basic)
+================================================================================
+
+from sklearn.ensemble import StackingRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+
+# Data
+X = [[1], [2], [3], [4], [5], [6], [7], [8]]
+y = [100, 150, 200, 250, 300, 350, 400, 450]
+
+# Base Models
+models = [
+    ('dt', DecisionTreeRegressor()),
+    ('lr', LinearRegression())
+]
+
+# Stacking Regressor
+model = StackingRegressor(
+    estimators=models,
+    final_estimator=LinearRegression()
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[5]]))
+
+
+================================================================================
+Stacking Regressor (SVR + DT + LR → KNN)
+================================================================================
+
+from sklearn.ensemble import StackingRegressor
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+
+# Data
+X = [[1], [2], [3], [4], [5], [6], [7], [8]]
+y = [100, 150, 200, 250, 300, 350, 400, 450]
+
+# Base models
+models = [
+    ('svr', SVR()),
+    ('dtr', DecisionTreeRegressor()),
+    ('lr',  LinearRegression())
+]
+
+# Final combiner  ← fixed: duplicate line removed from original
+model = StackingRegressor(
+    estimators=models,
+    final_estimator=KNeighborsRegressor(n_neighbors=2)
+)
+
+# Train
+model.fit(X, y)
+
+# Prediction
+print(model.predict([[5]]))
+
+
+================================================================================
+Stacking Regressor (With Train-Test Split & R2 Score)
+================================================================================
+
+from sklearn.ensemble import StackingRegressor
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+
+# Data
+X = [[1], [2], [3], [4], [5], [6], [7], [8]]
+y = [100, 150, 200, 250, 300, 350, 400, 450]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Base models
+models = [
+    ('svr', SVR()),
+    ('dtr', DecisionTreeRegressor()),
+    ('lr',  LinearRegression())
+]
+
+# Final combiner
+model = StackingRegressor(
+    estimators=models,
+    final_estimator=KNeighborsRegressor(n_neighbors=2)
+)
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+accuracy = r2_score(y_test, y_pred)
+
+# Output
+print("Predicted Price:", model.predict([[5]]))
+print("Accuracy:", accuracy)
+
+
+================================================================================
+Bagging Regressor (Crop Data)
+================================================================================
+
+import numpy as np
+from sklearn.ensemble import BaggingRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+
+# Features: Rainfall, Temperature, Crop Variety (encoded)
+X = np.array([
+    [200, 30, 1], [180, 28, 2], [220, 32, 1], [190, 29, 3], [210, 31, 2],
+    [195, 30, 1], [205, 32, 3], [185, 28, 2], [225, 33, 1], [175, 27, 3]
+])
+y = np.array([52, 55, 53, 60, 58, 62, 65, 68, 70, 75])  # Crop Prices
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a Bagging Regressor with multiple Decision Trees
+# n_estimators=10: Uses 10 different Decision Trees for prediction.
+bagging = BaggingRegressor(estimator=DecisionTreeRegressor(), n_estimators=10, random_state=42)
+bagging.fit(X_train, y_train)
+y_pred_bagging = bagging.predict(X_test)
+
+# Print accuracy (R-squared score)  ← fixed: was printed before being calculated in original
+accuracy = r2_score(y_test, y_pred_bagging)
+print(f"Bagging Regressor Accuracy (R^2 Score): {accuracy:.2f}")
+
+# Bagging with Linear Regression:
+# from sklearn.linear_model import LinearRegression
+# bagging = BaggingRegressor(estimator=LinearRegression(), n_estimators=10, random_state=42)
+
+# Bagging with Support Vector Regression (SVR):
+# from sklearn.svm import SVR
+# bagging = BaggingRegressor(estimator=SVR(), n_estimators=10, random_state=42)
+
+# Bagging with KNN:
+# from sklearn.neighbors import KNeighborsRegressor
+# bagging = BaggingRegressor(estimator=KNeighborsRegressor(), n_estimators=10, random_state=42)
+
+
+================================================================================
+Voting Regressor (Parallel Ensemble)
+================================================================================
+
+# VotingRegressor combines predictions from different models by averaging their outputs
+from sklearn.ensemble import VotingRegressor
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import r2_score
+
+# Define different models
+model_1 = SVR()
+model_2 = DecisionTreeRegressor(random_state=42)
+
+# Create a Voting Regressor
+# list of tuples: ('name', model_object)
+voting = VotingRegressor(estimators=[('svr', model_1), ('dtr', model_2)])
+
+# Train the model (uses X_train, y_train from the Bagging Regressor cell above)
+voting.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred  = voting.predict(X_test)
+accuracy = r2_score(y_test, y_pred)
+print(f"Voting Regressor Accuracy (R^2 Score): {accuracy:.2f}")
+
+
+================================================================================
+Section 6: Clustering
+================================================================================
+
+
+================================================================================
+K-Means Clustering
+================================================================================
+
+import pandas as pd
+from sklearn.cluster import KMeans
+
+data = {
+    'Age':    [22, 25, 30, 35, 40, 45],
+    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
 }
+df = pd.DataFrame(data)
+print("Dataset:")
+print(df)
+
+# n_clusters=2 : 2 groups (clusters)
+kmeans = KMeans(n_clusters=2, random_state=0)
+df['Cluster'] = kmeans.fit_predict(df)
+# fit()    - train the model
+# predict  - assign each point to a cluster
+# df['Cluster'] - Create new column called 'Cluster'
+
+print("\nClustered Data:")
+print(df)
+# X and Y are features (coordinates); clusters assigned based on distance between points.
 
 
-//---------------
-//student1.dart
-//---------------
+================================================================================
+K-Medoids Clustering
+================================================================================
 
-class Student {
-  String name;
-  String rollNo;
-  String age;
-  Student({required this.name, required this.rollNo, required this.age});
+!pip install scikit-learn-extra
+
+import pandas as pd
+from sklearn_extra.cluster import KMedoids
+
+data = {
+    'Age':    [22, 25, 30, 35, 40, 45],
+    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
 }
+df = pd.DataFrame(data)
 
-//---------------
-//login_page1.dart
-//---------------
+kmedoids = KMedoids(n_clusters=2, random_state=0)
+df['Cluster'] = kmedoids.fit_predict(df)
+print(df)
 
-import 'package:flutter/material.dart';
-import 'home_page1.dart';
 
-class LoginPage extends StatelessWidget {
-  final TextEditingController uc = TextEditingController();
-  final TextEditingController pc = TextEditingController();
+================================================================================
+Agglomerative Clustering
+================================================================================
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Login Page"),),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: uc,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
+import pandas as pd
+from sklearn.cluster import AgglomerativeClustering
 
-            TextField(
-              controller: pc,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-
-            SizedBox(height: 20,),
-            
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(username: uc.text)));
-              },
-              child: Text('Login'),
-            )
-          ],
-        ),
-        ),
-    );
-  }
+data = {
+    'Age':    [22, 25, 30, 35, 40, 45],
+    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
 }
+df = pd.DataFrame(data)
+
+# AgglomerativeClustering - creates a clustering model
+agg = AgglomerativeClustering(n_clusters=2)
+df['Cluster'] = agg.fit_predict(df)
+print(df)
 
 
-//---------------
-//home_page1.dart
-//---------------
+================================================================================
+Section 7: Pandas — Exploratory Data Analysis (EDA)
+================================================================================
 
-import 'package:flutter/material.dart';
-import 'student1.dart';
-import 'search_page1.dart';
+import pandas as pd
 
-class HomePage extends StatefulWidget {
-  final String username;
-  HomePage({required this.username});
+# Load the dataset
+data = pd.read_csv("/content/DEMO DATASET.csv")
 
-  @override
-  _HomePageState createState() => _HomePageState();
+# Display first 5 rows of the dataset
+print(data.head())
+
+# Display first 2 rows of the dataset
+print(data.head(2))
+
+# Display last 5 rows of the dataset
+print(data.tail())
+
+# Display last 3 rows of the dataset
+print(data.tail(3))
+
+# Check number of rows and columns
+print("Dataset Shape:", data.shape)
+
+# Display column names
+print("Columns:", data.columns)
+
+# Check data types of each column
+print(data.dtypes)
+
+# Check for missing values in each column
+print("Missing Values:\n", data.isnull().sum())
+
+# Basic statistical summary
+print(data.describe())
+
+# Check duplicate rows
+print("Duplicate Rows:", data.duplicated().sum())
+
+import pandas as pd
+
+data = pd.read_csv("/content/TEST_NULL_DUPLICATE - Sheet2.csv")
+
+print(data.duplicated().sum())  # Count duplicate rows
+
+# Check for Missing values in each column
+print(data.isnull().sum())
+
+
+================================================================================
+Section 8: Pandas — DataFrame Operations
+================================================================================
+
+import pandas as pd
+import numpy as np
+# np.nan - Represents blank or empty value in a table.
+
+# Converts the dictionary into a DataFrame
+df = pd.DataFrame({
+    'Roll_No':    [101, 102, 103, 104, 105],
+    'Name':       ['Amit', 'Riya', 'Kunal', 'Sneha', 'Vikram'],
+    'Maths':      [78, 85, np.nan, 92, 88],
+    'Science':    [80, np.nan, 75, 89, 90],
+    'Attendance': [90, 95, 88, 92, 85]
+})
+df
+
+# Add a New Column
+df['Result'] = ['Pass', 'Pass', 'Fail', 'Pass', 'Pass']
+df
+
+df.insert(2, 'English', [50, 60, 70, 80, 75])
+df
+
+# Access Single Column
+df['Name']
+
+df[['Roll_No', 'Result']]  # Access Multiple Columns
+# Single bracket [ ]  - One column
+# Double bracket [[ ]] - Multiple columns
+
+# Add New Calculated Column
+df['Total'] = df['Maths'] + df['Science']
+# NOTE: Missing values (np.nan) will result in NaN total
+df
+
+# Add Column with Same Value for All
+df['College'] = 'GLS University'
+df
+
+df = df.assign(
+    total_eng_math=df['English'] + df['Maths'],
+    Grade=['B', 'A', 'C', 'A', 'B']
+)
+df
+
+# Finding the minimum, Maximum, Sum, Average and Count
+data = pd.DataFrame({
+    "Name":       ["Aarav", "Ishita", "Vihaan", "Ananya", "Devanshi"],
+    "Age":        [25, 22, 28, 21, 25],
+    "Salary":     [50000, 60000, 55000, 45000, 70000],
+    "Experience": [2, 3, 5, 1, 4]
+})
+data
+
+# Print min, max, sum, average, and count for the "Salary" column
+print('salary_min:', data["Salary"].min(), 'age_min:', data["Age"].min())
+print('salary_max:', data["Salary"].max())
+print('salary_sum:', data["Salary"].sum())
+print('salary_avg:', data["Salary"].mean())
+print('salary_count:', data["Salary"].count())
+# .count() - counts how many NON-MISSING (non-NaN) values are present in a column.
+
+# Find unique values in each column
+unique_names  = data["Name"].unique()
+unique_ages   = data["Age"].unique()
+unique_salary = data["Salary"].unique()
+
+# Print the unique values for each column
+print("Unique Names:",  unique_names)
+print("Unique Ages:",   unique_ages)
+print("unique Salary:", unique_salary)
+
+# Increase Salary by 5000 for everyone
+data['Salary'] = data['Salary'] + 5000
+data
+
+# Replace: Change Old value without any condition
+# condition based value change: LOC
+data['Salary'] = data['Salary'].replace(75000, 50000)
+data
+
+data['Age'] = data['Age'].replace(25, 27)
+data
+
+# Replace Multiple values: {old_value: new_value}
+data['Age'] = data['Age'].replace({21: 22, 22: 23})
+data
+
+
+================================================================================
+Section 9: Pandas — Missing Values Handling
+================================================================================
+
+import pandas as pd
+import numpy as np
+
+# House sales dataset with missing values
+house_data = pd.DataFrame({
+    "House_ID":  [101, 102, 103, 104, 105],
+    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
+    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
+    "Bedrooms":  [3, 4, 3, np.nan, 2]
+})
+print(house_data)
+
+# Fill missing values with one constant value
+house_data.fillna(0)
+
+house_data_1 = pd.DataFrame({
+    "House_ID":  [101, 102, 103, 104, 105],
+    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
+    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
+    "Bedrooms":  [3, 4, 3, np.nan, 2]
+})
+house_data_1
+
+# Forward fill (ffill) - fills NaN with the previous valid value
+house_data_1.ffill()
+
+house_data_2 = pd.DataFrame({
+    "House_ID":  [101, 102, 103, 104, 105],
+    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
+    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
+    "Bedrooms":  [3, 4, 3, np.nan, 2]
+})
+house_data_2
+
+# Backward fill (bfill) - fills NaN with the next valid value
+house_data_2.bfill()
+
+import pandas as pd
+import numpy as np
+
+house_salesdata = pd.DataFrame({
+    "House_ID":  [101, 102, 103, 104, 105],
+    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
+    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
+    "Bedrooms":  [3, 4, 3, np.nan, 2]
+})
+print(house_salesdata)
+
+area_mean     = house_salesdata['Area_sqft'].mean()   # (1200 + 1500 + 1300)/3 = 1333.33
+price_mean    = house_salesdata['Price'].mean()       # (5000000 + 6000000 + 5500000)/3 = 5500000
+bedrooms_mean = house_salesdata['Bedrooms'].mean()    # (3 + 4 + 3 + 2)/4 = 3.0
+
+# Fill Missing Values with Mean values
+house_salesdata['Area_sqft'] = house_salesdata['Area_sqft'].fillna(area_mean)
+house_salesdata['Price']     = house_salesdata['Price'].fillna(price_mean)
+house_salesdata['Bedrooms']  = house_salesdata['Bedrooms'].fillna(bedrooms_mean)
+print(house_salesdata)
+
+# Column-specific fill (alternative methods):
+# house_data['Area_sqft'] = house_data['Area_sqft'].fillna(house_data['Area_sqft'].mean())
+# house_data['Price']     = house_data['Price'].fillna(5500000)
+# house_data['Bedrooms']  = house_data['Bedrooms'].fillna(3)
+# house_data['Bedrooms']  = house_data['Bedrooms'].fillna(house_data['Bedrooms'].mode()[0])
+# print(house_data)
+
+import pandas as pd
+
+cropsampledata = pd.DataFrame({
+    "Crop":       ["Wheat", "Rice", "Maize", "Wheat", "Soybean"],
+    "Area_acres": [100, 120, 150, 100, 120]
+})
+cropsampledata
+
+# Get mode of Area_acres
+mode_value = cropsampledata['Area_acres'].mode()
+print(mode_value)
+
+mode_value = cropsampledata['Area_acres'].mode()[0]
+print(mode_value)
+
+import pandas as pd
+import numpy as np
+from sklearn.impute import KNNImputer
+
+# Crop dataset with missing values
+crop_data = pd.DataFrame({
+    "Crop":          ["Wheat", "Rice", "Maize", "Barley", "Soybean"],
+    "Area_acres":    [100, np.nan, 150, 120, np.nan],
+    "Yield_tons":    [30, 40, np.nan, 35, 25],
+    "Fertilizer_kg": [200, 250, 220, np.nan, np.nan]
+})
+print(crop_data)
+
+# Print crops with Area_acres greater than 120:
+filtered_data = crop_data[crop_data["Area_acres"] > 120]
+print(filtered_data)
+
+# Select crops where Area_acres > 100 AND Yield_tons > 30
+crop_data[(crop_data["Area_acres"] > 100) & (crop_data["Yield_tons"] > 30)]
+
+# Select crops where Area_acres > 140 OR Yield_tons < 30
+crop_data[(crop_data["Area_acres"] > 140) | (crop_data["Yield_tons"] < 30)]
+
+# Select crops where Yield_tons is NOT greater than 30
+crop_data[~(crop_data["Yield_tons"] > 30)]
+
+import pandas as pd
+
+data = pd.DataFrame({
+    "Fruit":    ["Apple", "Banana", "Orange", "Grapes"],
+    "Quantity": [10, 5, 8, 12],
+    "Price":    [100, 50, 80, 120]
+})
+print("Original DataFrame:")
+print(data)
+
+del data["Quantity"]  # deletes the column, not rows
+
+# Keep only rows where Price >= 100
+data = data[data["Price"] >= 100]
+print(data)
+
+import pandas as pd
+
+data = pd.DataFrame({
+    "Fruit":    ["Apple", "Banana", "Orange", "Grapes"],
+    "Quantity": [10, 5, 8, 12],
+    "Price":    [100, 50, 80, 120]
+})
+print("Original DataFrame:")
+print(data)
+
+# Export to CSV
+data.to_csv("fruits.csv")
+
+import os
+print(os.getcwd())  # Shows the current folder
+
+import pandas as pd
+
+data = {
+    'A': [10, 20, None, 10, None],
+    'B': [1, 2, 3, 4, 5]
 }
+df = pd.DataFrame(data)
+print(df)
 
-class _HomePageState extends State<HomePage> {
-  List<Student> students = [];
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController rollNoController = TextEditingController();
-  final TextEditingController ageController = TextEditingController();
+df['A'].mode()
 
-  void addStudent() {
-    if (nameController.text.isNotEmpty && rollNoController.text.isNotEmpty && ageController.text.isNotEmpty) {
-      setState(() {
-        students.add(Student(name: nameController.text, rollNo: rollNoController.text, age: ageController.text));
+df['A'] = df['A'].fillna(df['A'].mode()[0])
+print(df)
 
-        nameController.clear();
-        rollNoController.clear();
-        ageController.clear();
-      });
-    }
-  }
 
-  void deleteStudent(int index) {
-    setState(() {
-      students.removeAt(index);
-    });
-  }
+================================================================================
+Section 10: KNN Imputer & Preprocessing (Scaling + Encoding)
+================================================================================
 
-  void editStudent(int index) {
-    nameController.text = students[index].name;
-    rollNoController.text = students[index].rollNo;
-    ageController.text = students[index].age;
-  }
+import pandas as pd
+from sklearn.impute import KNNImputer
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome, ${widget.username}'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage(students: students)));
-              },
-              icon: Icon(Icons.search),
-            ),
-          ),
-        ],
-        ),
-      
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name'),),
-            TextField(controller: rollNoController, decoration: InputDecoration(labelText: 'Roll No.'),),
-            TextField(controller: ageController, decoration: InputDecoration(labelText: 'Age'),),
-            
-            SizedBox(height: 20),
+df = pd.DataFrame({
+    'Maths':   [80, 90, None, 70],
+    'Science': [85, None, 88, 75]
+})
+print(df)
 
-            ElevatedButton(
-              onPressed: addStudent,
-              child: Text('Add Student')
-            ),
+df[:] = KNNImputer(n_neighbors=2).fit_transform(df)
+# Works only for numerical data
+# df[:]   → all rows, all columns
+# df[:3]  → first 3 rows, all columns
+# df[1:4] → rows from index position 1 to 3, all columns
+# fit       - learns distances
+# transform - replaces missing values using KNN logic
+print(df)
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: students.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(students[index].name),
-                  subtitle: Text('Roll No.: ${students[index].rollNo}, Age: ${students[index].age}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(onPressed: () => editStudent(index), icon: Icon(Icons.edit)),
-                      IconButton(onPressed: () => deleteStudent(index), icon: Icon(Icons.delete))
-                    ],
-                  ),
-                ),
-              )
-            )
-          ],
-        ),
-        ),
-    );
-  }
+from sklearn.preprocessing import StandardScaler
+# StandardScaler transforms data to z-scores (mean=0, std=1)
+
+df = pd.DataFrame({
+    'Maths':   [80, 90, None, 70],
+    'Science': [85, None, 88, 75]
+})
+print(df)
+
+scaler = StandardScaler()
+df_scaled = scaler.fit_transform(df)
+print(df_scaled)
+
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+df = pd.DataFrame({
+    'Age':    [25, 30, 35, 40],
+    'Salary': [50000, 52000, 58000, 60000]
+})
+print("Original Data:")
+print(df)
+
+Minmax = MinMaxScaler()
+df_scaled = Minmax.fit_transform(df)
+print(df_scaled)
+
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+data = {
+    'Crop_Name': ['Wheat', 'Rice', 'Cotton', 'Rice', 'Wheat']
 }
+df = pd.DataFrame(data)
+print(df)
 
+le = LabelEncoder()
+df['Crop_Encoded'] = le.fit_transform(df['Crop_Name'])
+print(df)
 
-//---------------
-//search_page1.dart
-//---------------
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
-import 'package:flutter/material.dart';
-import 'student1.dart';
-
-class SearchPage extends StatefulWidget  {
-  final List<Student> students;
-  SearchPage({required this.students});
-
-  @override
-  State<SearchPage> createState() => _SearchPageState();
+data = {
+    'Crop_Name': ['Wheat', 'Rice', 'Cotton', 'Rice', 'Wheat'],
+    'Month':     ['Winter', 'Summer', 'Summer', 'Winter', 'Winter']
 }
+df = pd.DataFrame(data)
 
-class _SearchPageState extends State<SearchPage> {
-  List<Student> filteredStudents = [];
-  final TextEditingController searchController = TextEditingController();
+le = LabelEncoder()
+for col in df.columns:   # ← fixed: original had 'df columns' (missing dot)
+    df[col] = le.fit_transform(df[col])
+print(df)
 
-  @override
-  void initState() {
-    super.initState();
-    filteredStudents = List.from(widget.students);
-  }
 
-  void searchStudent() {
-    String query = searchController.text.trim().toLowerCase();
+================================================================================
+Section 11: Pandas — Demo Dataset EDA & Drop Operations
+================================================================================
 
-    setState(() {
-      if (query.isEmpty) {
-        filteredStudents = List.from(widget.students);
-      } else {
-        filteredStudents = widget.students
-            .where((student) => student.name.toLowerCase().contains(query))
-            .toList();
-      }
-    });
-  }
+import pandas as pd
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Search Student"),),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(labelText: "Search by name"),
-              onChanged: (value) => searchStudent(),
-            ),
+# Load the dataset
+data = pd.read_csv("/content/DEMO DATASET (1).csv")
+print(data)
 
-            SizedBox(height: 20,),
+# Display first 5 rows of the dataset
+print(data.head())
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredStudents.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(filteredStudents[index].name),
-                  subtitle: Text('Roll No ${filteredStudents[index].rollNo}, Age: ${filteredStudents[index].age}'),
-                ),
-                ),
-            ),
-          ],
-        ), 
-        ),
-    );
-  }
-}
+# Display first 2 rows of the dataset
+print(data.head(2))
 
+# Display last 5 rows of the dataset
+print(data.tail())
 
+# Display last 3 rows of the dataset
+print(data.tail(3))
 
+# Check number of rows and columns
+print("Dataset Shape:", data.shape)
 
-##########################
-Employee Management System
-##########################
+# Display column names
+print("Columns:", data.columns)
 
-//----------------
-//main.dart
-//----------------
+# Check data types of each column
+print(data.dtypes)
 
-import 'package:flutter/material.dart';
-import 'login_page.dart';
+# Check for missing values in each column
+print("Missing Values:\n", data.isnull().sum())
 
-void main() => runApp(MyApp());
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginPage(),
-    );
-  }
-}
+# Basic statistical summary
+print(data.describe())
 
+# Check duplicate rows
+print("Duplicate Rows:", data.duplicated().sum())
 
-//----------------
-//employee.dart
-//----------------
+# Dataset information (data types, non-null count)
+data.info()
 
-class Employee {
-  String name;
-  String id;
-  String salary;
+# Total number of values
+print("Total values (data.size):", data.size)
 
-  Employee({required this.name, required this.id, required this.salary});
-}
+import pandas as pd
 
+data = pd.read_csv("/content/DEMO DATASET (1).csv")
 
-//----------------
-//login_page.dart
-//----------------
+print(data.duplicated().sum())  # Count duplicate rows
 
-import 'package:flutter/material.dart';
-import 'home_page.dart';
+# Check for Missing values in each column
+print(data.isnull().sum())
 
-class LoginPage extends StatelessWidget {
-  final TextEditingController uc = TextEditingController();
-  final TextEditingController pc = TextEditingController();
+print(data['Min Price (₹/Qtl)'].mean())
+print(data['Min Price (₹/Qtl)'].median())
+print(data['Min Price (₹/Qtl)'].mode())
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Login")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: uc, decoration: InputDecoration(labelText: "Username")),
-            TextField(controller: pc, decoration: InputDecoration(labelText: "Password"), obscureText: true),
+# Rename column Syntax:
+# df.rename(columns={'old_name1': 'new_name1', 'old_name2': 'new_name2'}, inplace=False)
+# inplace=False → keeps the original DataFrame unchanged and returns a new one.
+# inplace=True  → updates the original DataFrame directly.
+# By default, if you don't pass inplace, it is False.
 
-            SizedBox(height: 20),
+# Rename columns
+data.rename(columns={'old_name1': 'new_name1', 'old_name2': 'new_name2'})
 
-            ElevatedButton(
-              onPressed: () {
-                if (uc.text == "admin" && pc.text == "12345") {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => HomePage(),
-                  ));
-                } else {
-                  print("Invalid Login");
-                }
-              },
-              child: Text("Login"),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
+# drop() removes rows or columns by label
+# dropna() removes rows or columns containing missing values (NaN)
+# axis=0 = remove rows | axis=1 = remove columns
+# inplace=True  → modify original DataFrame directly
+# inplace=False → return new DataFrame (default)
 
+data.drop('Market', axis=1)        # drops column 'Market'
 
-//----------------
-//home_page.dart
-//----------------
+data.drop(2, axis=0)  # drops row with index 2  (axis=0 means row)
 
-import 'package:flutter/material.dart';
-import 'employee.dart';
-import 'add_page.dart';
-import 'show_page.dart';
-import 'search_page.dart';
-import 'update_page.dart';
-import 'delete_page.dart';
-
-class HomePage extends StatefulWidget {
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List<Employee> employees = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Home")),
-
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(child: Text("Menu")),
-            ListTile(title: Text("Profile")),
-            ListTile(title: Text("Settings")),
-            ListTile(title: Text("Help")),
-            ListTile(title: Text("Logout")),
-          ],
-        ),
-      ),
-
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => AddPage(employees))),
-            child: Text("Add"),
-          ),
-
-          ElevatedButton(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => ShowPage(employees))),
-            child: Text("Show"),
-          ),
-
-          ElevatedButton(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => SearchPage(employees))),
-            child: Text("Search"),
-          ),
-
-          ElevatedButton(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => UpdatePage(employees))),
-            child: Text("Update"),
-          ),
-
-          ElevatedButton(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => DeletePage(employees))),
-            child: Text("Delete"),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-//----------------
-//add_page.dart
-//----------------
-
-import 'package:flutter/material.dart';
-import 'employee.dart';
-
-class AddPage extends StatefulWidget {
-  final List<Employee> employees;
-  AddPage(this.employees);
-
-  @override
-  State<AddPage> createState() => _AddPageState();
-}
-
-class _AddPageState extends State<AddPage> {
-  TextEditingController name = TextEditingController();
-  TextEditingController id = TextEditingController();
-  TextEditingController salary = TextEditingController();
-
-  void add() {
-    setState(() {
-
-      if (name.text.isNotEmpty && id.text.isNotEmpty && salary.text.isNotEmpty) {
-        widget.employees.add(Employee(
-          name: name.text,
-          id: id.text,
-          salary: salary.text,
-        ));
-      }
-      
-      name.clear();
-      id.clear();
-      salary.clear();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Add Employee")),
-      body: Column(
-        children: [
-          TextField(controller: name, decoration: InputDecoration(labelText: "Name")),
-          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
-          TextField(controller: salary, decoration: InputDecoration(labelText: "Salary")),
-
-          ElevatedButton(onPressed: add, child: Text("Add"))
-        ],
-      ),
-    );
-  }
-}
-
-
-//----------------
-//show_page.dart
-//----------------
-
-import 'package:flutter/material.dart';
-import 'employee.dart';
-
-class ShowPage extends StatelessWidget {
-  final List<Employee> employees;
-  ShowPage(this.employees);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("All Employees")),
-      body: ListView.builder(
-        itemCount: employees.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(employees[index].name),
-            subtitle: Text("ID: ${employees[index].id}, Salary: ${employees[index].salary}"),
-          );
-        },
-      ),
-    );
-  }
-}
-
-
-//----------------
-//search_page.dart
-//----------------
-
-import 'package:flutter/material.dart';
-import 'employee.dart';
-
-class SearchPage extends StatefulWidget {
-  final List<Employee> employees;
-  SearchPage(this.employees);
-
-  @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  TextEditingController search = TextEditingController();
-  List<Employee> result = [];
-
-  void doSearch() {
-    setState(() {
-      result = widget.employees
-          .where((e) => e.id.contains(search.text))
-          .toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Search")),
-      body: Column(
-        children: [
-          TextField(controller: search, onChanged: (_) => doSearch()),
-          Expanded(
-            child: ListView.builder(
-              itemCount: result.length,
-              itemBuilder: (context, i) => ListTile(
-                title: Text(result[i].name),
-                subtitle: Text(result[i].id),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-
-//----------------
-//update_page.dart
-//----------------
-
-import 'package:flutter/material.dart';
-import 'employee.dart';
-
-class UpdatePage extends StatefulWidget {
-  final List<Employee> employees;
-  UpdatePage(this.employees);
-
-  @override
-  State<UpdatePage> createState() => _UpdatePageState();
-}
-
-class _UpdatePageState extends State<UpdatePage> {
-  TextEditingController id = TextEditingController();
-  TextEditingController name = TextEditingController();
-  TextEditingController salary = TextEditingController();
-
-  void update() {
-    for (var e in widget.employees) {
-      if (e.id == id.text) {
-        setState(() {
-          e.name = name.text;
-          e.salary = salary.text;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Update")),
-      body: Column(
-        children: [
-          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
-          TextField(controller: name, decoration: InputDecoration(labelText: "New Name")),
-          TextField(controller: salary, decoration: InputDecoration(labelText: "New Salary")),
-
-          ElevatedButton(onPressed: update, child: Text("Update"))
-        ],
-      ),
-    );
-  }
-}
-
-
-//----------------
-//delete_page.dart
-//----------------
-
-import 'package:flutter/material.dart';
-import 'employee.dart';
-
-class DeletePage extends StatefulWidget {
-  final List<Employee> employees;
-  DeletePage(this.employees);
-
-  @override
-  State<DeletePage> createState() => _DeletePageState();
-}
-
-class _DeletePageState extends State<DeletePage> {
-  TextEditingController id = TextEditingController();
-
-  void delete() {
-    setState(() {
-      widget.employees.removeWhere((e) => e.id == id.text);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Delete")),
-      body: Column(
-        children: [
-          TextField(controller: id, decoration: InputDecoration(labelText: "ID")),
-          ElevatedButton(onPressed: delete, child: Text("Delete"))
-        ],
-      ),
-    );
-  }
-}
-
-##################
-Dialog Box Example
-##################
-
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  void showDialogBox(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Dialog Box"),
-          content: Text("This is a simple dialog example."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Dialog Example"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            showDialogBox(context);
-          },
-          child: Text("Show Dialog"),
-        ),
-      ),
-    );
-  }
-}
-
-
-#################
-Bottom Navigation
-#################
-
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  int selectedIndex = 0;
-
-  final List<Widget> pages = [
-    Center(child: Text("Home Page")),
-    Center(child: Text("Search Page")),
-    Center(child: Text("Profile Page")),
-  ];
-
-  void changeTab(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Bottom Navigation Demo")),
-        body: pages[selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: selectedIndex,
-          onTap: changeTab,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: "Home",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: "Search",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: "Profile",
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+# data.dropna(axis=0)  # drops rows with any missing value
+# data.dropna(axis=1)  # drops columns with any missing value
+data.dropna()
