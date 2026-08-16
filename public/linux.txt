@@ -1,1243 +1,794 @@
-================================================================================
-Section 1: Classification — Iris Dataset
-================================================================================
+# Implement single neuron using function from scratch
 
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
+def step_function(x):
+  return 1 if x>=0 else 0
+
+def single_neuron(x, w, b):
+  total = 0
+
+  for i in range(len(x)):
+    total += x[i]*w[i]
+  total += b
+
+  output = step_function(total)
+  return output
+
+single_neuron([1,2,3], [0.1,0.2,0.3], 0.5)
+
+--------------------------------------------------------
+
+#  Implement the AND, OR logical gate using a single-layer perceptron
+
+def step_function(x):
+  return 1 if x>=0 else 0
+
+def perceptron(x1, x2, w1, w2, b):
+  z = x1*w1 + x2*w2 + b
+  return step_function(z)
+
+def AND(x1, x2):
+  return perceptron(x1, x2, 1, 1, -1.5)
+
+def OR(x1, x2):
+  return perceptron(x1, x2, 1, 1, -0.5)
+
+print(AND(1, 2))
+print(OR(0, -1))
+
+----------------------------------------------------------
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-
-# Load dataset
-df = pd.read_csv('/content/sample_data/iris.csv')
-print(df.head())
-
-# Check class distribution
-print("\nCount of each species:")
-print(df['species'].value_counts())
-
-# Split X and Y using column names
-x = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']].values
-y = df['species'].values
-# .values - To convert Pandas data into NumPy array format.
-
-# Convert categorical to numerical
-labelencoder_y = LabelEncoder()
-y = labelencoder_y.fit_transform(y)
-
-# Train-Test Split
-x_train, x_test, y_train, y_test = train_test_split(
-    x, y, test_size=0.2, random_state=42
-)
-
-
-================================================================================
-SVC (Support Vector Classifier)
-================================================================================
-
-from sklearn.svm import SVC
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-
-# Apply SVC
-classifier_svc = SVC(kernel='linear')  # You can use 'rbf' also
-classifier_svc.fit(x_train, y_train)
-
-# Prediction  ← fixed: y_pred line was missing in original
-y_pred = classifier_svc.predict(x_test)
-
-# Evaluation
-cm = confusion_matrix(y_test, y_pred)
-print("\nConfusion Matrix:\n", cm)
-accuracy = accuracy_score(y_test, y_pred)
-print("\nAccuracy:", accuracy)
-precision = precision_score(y_test, y_pred, average='macro')
-print("Precision:", precision)
-recall = recall_score(y_test, y_pred, average='macro')
-print("Recall:", recall)
-f1 = f1_score(y_test, y_pred, average='macro')
-print("F1 Score:", f1)
-
-
-================================================================================
-Naive Bayes (GaussianNB)
-================================================================================
-
-from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-
-classifier_nb = GaussianNB()
-classifier_nb.fit(x_train, y_train)
-
-# Prediction
-y_pred = classifier_nb.predict(x_test)
-print("\nPredicted Output:\n", y_pred)
-
-# Evaluation
-cm = confusion_matrix(y_test, y_pred)
-print("\nConfusion Matrix:\n", cm)
-accuracy = accuracy_score(y_test, y_pred)
-print("\nAccuracy:", accuracy)
-precision = precision_score(y_test, y_pred, average='macro')
-print("Precision:", precision)
-recall = recall_score(y_test, y_pred, average='macro')
-print("Recall:", recall)
-f1 = f1_score(y_test, y_pred, average='macro')
-print("F1 Score:", f1)
-
-
-================================================================================
-Decision Tree Classifier
-================================================================================
-
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-
-# Create Decision Tree model
-classifier_dt = DecisionTreeClassifier(random_state=42)
-classifier_dt.fit(x_train, y_train)
-
-# Prediction
-y_pred = classifier_dt.predict(x_test)
-print("Predicted Output:\n", y_pred)
-
-# Evaluation
-cm = confusion_matrix(y_test, y_pred)
-print("\nConfusion Matrix:\n", cm)
-accuracy = accuracy_score(y_test, y_pred)
-print("\nAccuracy:", accuracy)
-precision = precision_score(y_test, y_pred, average='macro')
-print("Precision:", precision)
-recall = recall_score(y_test, y_pred, average='macro')
-print("Recall:", recall)
-f1 = f1_score(y_test, y_pred, average='macro')
-print("F1 Score:", f1)
-
-
-================================================================================
-KNN Classifier
-================================================================================
-
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-
-# Create KNN model
-classifier_knn = KNeighborsClassifier(n_neighbors=5)
-classifier_knn.fit(x_train, y_train)
-
-# Prediction
-y_pred = classifier_knn.predict(x_test)
-print("Predicted Output:\n", y_pred)
-
-# Evaluation
-cm = confusion_matrix(y_test, y_pred)
-print("\nConfusion Matrix:\n", cm)
-accuracy = accuracy_score(y_test, y_pred)
-print("\nAccuracy:", accuracy)
-precision = precision_score(y_test, y_pred, average='macro')
-print("Precision:", precision)
-recall = recall_score(y_test, y_pred, average='macro')
-print("Recall:", recall)
-f1 = f1_score(y_test, y_pred, average='macro')
-print("F1 Score:", f1)
-
-
-================================================================================
-Section 2: Regression — Housing Dataset
-================================================================================
-
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-
-# Load dataset
-df = pd.read_csv("/content/sample_data/Housing.csv")
-
-# Features and target
-X = df[['area', 'bedrooms', 'bathrooms', 'stories', 'mainroad',
-        'guestroom', 'basement', 'hotwaterheating', 'airconditioning',
-        'parking', 'prefarea']]
-Y = df['price']  # Target variable
-# OR:
-# X = df.drop("price", axis=1)   # axis=0 → rows, axis=1 → columns
-# y = df["price"]
-
-# Convert categorical variables to numeric
-X = pd.get_dummies(X, drop_first=True)  # One-hot encoding for categorical variables
-X = pd.get_dummies(X, drop_first=True).astype(int)
-
-# Split Training 70%, Testing 30%
-X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=0.30, random_state=42
-)
-
-
-================================================================================
-Linear Regression
-================================================================================
-
-# Train model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# Prediction
-y_pred = model.predict(X_test)
-
-# Evaluation
-mse  = mean_squared_error(y_test, y_pred)
-rmse = np.sqrt(mse)
-r2   = r2_score(y_test, y_pred)
-print("Linear Regression Results")
-print("MSE :", mse)
-print("RMSE:", rmse)
-print("R2  :", r2)
-
-# OR (alternative evaluation with MAE and MAPE):
-# mae  = mean_absolute_error(y_test, y_pred)
-# mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
-# print(f"Mean Absolute Error (MAE): {mae:.2f}")
-# print(f"Mean Squared Error (MSE): {mse:.2f}")
-# print(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
-# print(f"R-squared Score (R2): {r2:.4f}")
-# print(f"Mean Absolute Percentage Error (MAPE): {mape:.2f}%")
-
-
-================================================================================
-Decision Tree Regressor
-================================================================================
-
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import numpy as np
-
-# Initialize and train Decision Tree model
-dt_model = DecisionTreeRegressor()
-dt_model.fit(X_train, y_train)
-
-# Prediction
-dt_pred = dt_model.predict(X_test)
-
-# Evaluation
-mse  = mean_squared_error(y_test, dt_pred)
-rmse = np.sqrt(mse)
-r2   = r2_score(y_test, dt_pred)
-print("Decision Tree Regressor Results")
-print("MSE :", mse)
-print("RMSE:", rmse)
-print("R2  :", r2)
-
-
-================================================================================
-Random Forest Regressor
-================================================================================
-
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
-
-# Initialize and train Random Forest Regressor
-rf_model = RandomForestRegressor()
-rf_model.fit(X_train, y_train)
-
-# Make predictions
-y_pred_rf = rf_model.predict(X_test)
-
-# Evaluate model
-mse_rf = mean_squared_error(y_test, y_pred_rf)
-print("Random Forest Regression Mean Squared Error:", mse_rf)
-
-
-================================================================================
-KNN Regressor
-================================================================================
-
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import mean_squared_error
-
-knn_model = KNeighborsRegressor(n_neighbors=5)
-knn_model.fit(X_train, y_train)
-y_pred = knn_model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-print("KNN Regression MSE:", mse)
-
-
-================================================================================
-Section 3: Logistic Regression — Housing Dataset
-================================================================================
-
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, accuracy_score
-
-df = pd.read_csv("/content/sample_data/Housing.csv")
-
-# Convert price into binary category using median
-median_price = df["price"].median()
-df["Price_Category"] = (df["price"] > median_price).astype(int)
-# If a house price is greater than the median → TRUE : 1 (High price)
-# Otherwise → FALSE: 0 (Low price)
-
-X = df.drop(columns=["price", "Price_Category"])
-y = df["Price_Category"]
-
-# Convert all categorical columns into numeric
-X = pd.get_dummies(X, drop_first=True)
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Train Logistic Regression model
-logmodel = LogisticRegression()
-logmodel.fit(X_train, y_train)
-
-# Predict
-y_pred = logmodel.predict(X_test)
-
-# Evaluation
-conf_matrix = confusion_matrix(y_test, y_pred)
-accuracy    = accuracy_score(y_test, y_pred)
-print("Confusion Matrix:\n", conf_matrix)
-print("Accuracy:", accuracy)
-
-
-================================================================================
-Section 4: Ensemble Methods — Classifiers
-================================================================================
-
-
-================================================================================
-Bagging Classifier (Simple Prediction)
-================================================================================
-
-from sklearn.ensemble import BaggingClassifier
-from sklearn.tree import DecisionTreeClassifier
-
-# Data
-X = [[1], [2], [3], [4], [5]]  # Study Hours
-y = [0, 0, 1, 1, 1]            # 0 = Fail, 1 = Pass
-
-# Bagging Model
-model = BaggingClassifier(DecisionTreeClassifier(), n_estimators=5)
-
-# Train
-model.fit(X, y)
-
-# Prediction - If a student studies 2 hours, will they Pass or Fail?
-print(model.predict([[2]]))  # Predict for 2 hours study
-
-
-================================================================================
-Bagging Classifier (With Accuracy)
-================================================================================
-
-from sklearn.ensemble import BaggingClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
-
-# Data
-X = [[1], [2], [3], [4], [5]]   # Study Hours
-y = [0, 0, 1, 1, 1]             # 0 = Fail, 1 = Pass
-
-# Bagging Model
-model = BaggingClassifier(DecisionTreeClassifier(), n_estimators=5)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-y_pred = model.predict(X)
-
-# Accuracy
-accuracy = accuracy_score(y, y_pred)
-print("Accuracy:", accuracy)
-
-# Test Prediction
-print("Prediction for 2 hours study:", model.predict([[2]]))
-
-
-================================================================================
-AdaBoost Classifier
-================================================================================
-
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-
-# Data
-X = [[1], [2], [3], [4], [5]]
-y = [0, 0, 1, 1, 1]
-
-# Boosting Model
-model = AdaBoostClassifier(
-    DecisionTreeClassifier(max_depth=1),  # Only 1 split in tree
-    n_estimators=5                         # 5 decision trees will be created.
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[4]]))
-
-
-================================================================================
-Gradient Boosting Classifier
-================================================================================
-
-from sklearn.ensemble import GradientBoostingClassifier
-
-# Data
-X = [[1], [2], [3], [4], [5], [6]]
-y = [0, 0, 1, 1, 1, 0]
-
-# Gradient Boosting Model
-# learning_rate=1 → Learn fast | 0.1 → Learn slowly | 0.01 → Learn very slowly
-model = GradientBoostingClassifier(
-    n_estimators=5,
-    learning_rate=0.1
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[5]]))
-
-
-================================================================================
-XGBoost Classifier
-================================================================================
-
-from xgboost import XGBClassifier
-
-# Data
-X = [[1], [2], [3], [4], [5], [6]]
-y = [0, 0, 1, 1, 1, 0]
-
-# XGBoost Model
-model = XGBClassifier(
-    n_estimators=5,
-    learning_rate=0.1
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[3]]))
-
-
-================================================================================
-Stacking Classifier
-================================================================================
-
-from sklearn.ensemble import StackingClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
-
-# Sample Data
-X = [[1], [2], [3], [4], [5], [6], [7], [8]]  # Study Hours
-y = [0, 0, 1, 1, 1, 0, 1, 1]                   # 0 = Fail, 1 = Pass
-
-# Base models
-models = [
-    ('dt', DecisionTreeClassifier()),
-    ('lr', LogisticRegression())
-]
-
-# Stacking model
-model = StackingClassifier(
-    estimators=models,
-    final_estimator=LogisticRegression()
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[4]]))
-
-
-================================================================================
-Section 5: Ensemble Methods — Regressors
-================================================================================
-
-
-================================================================================
-AdaBoost Regressor
-================================================================================
-
-from sklearn.ensemble import AdaBoostRegressor
-from sklearn.tree import DecisionTreeRegressor
-
-# Data
-X = [[1], [2], [3], [4], [5], [6]]
-y = [100, 150, 200, 250, 300, 350]
-
-# Model
-model = AdaBoostRegressor(
-    DecisionTreeRegressor(max_depth=1),
-    n_estimators=5
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[4]]))
-
-
-================================================================================
-Gradient Boosting Regressor
-================================================================================
-
-from sklearn.ensemble import GradientBoostingRegressor
-
-# Data
-X = [[1], [2], [3], [4], [5], [6]]
-y = [100, 150, 200, 250, 300, 350]
-
-# Model
-model = GradientBoostingRegressor(
-    n_estimators=5,
-    learning_rate=0.1,
-    max_depth=2
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[5]]))
-
-
-================================================================================
-XGBoost Regressor
-================================================================================
-
-from xgboost import XGBRegressor
-
-# Data
-X = [[1], [2], [3], [4], [5], [6]]  # HOUSE SIZE
-y = [100, 150, 200, 250, 300, 350]  # PRICE
-
-# Model
-model = XGBRegressor(
-    n_estimators=5,
-    learning_rate=0.1,
-    max_depth=2
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[3]]))
-
-
-================================================================================
-Stacking Regressor (Basic)
-================================================================================
-
-from sklearn.ensemble import StackingRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.linear_model import LinearRegression
-
-# Data
-X = [[1], [2], [3], [4], [5], [6], [7], [8]]
-y = [100, 150, 200, 250, 300, 350, 400, 450]
-
-# Base Models
-models = [
-    ('dt', DecisionTreeRegressor()),
-    ('lr', LinearRegression())
-]
-
-# Stacking Regressor
-model = StackingRegressor(
-    estimators=models,
-    final_estimator=LinearRegression()
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[5]]))
-
-
-================================================================================
-Stacking Regressor (SVR + DT + LR → KNN)
-================================================================================
-
-from sklearn.ensemble import StackingRegressor
-from sklearn.svm import SVR
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
-
-# Data
-X = [[1], [2], [3], [4], [5], [6], [7], [8]]
-y = [100, 150, 200, 250, 300, 350, 400, 450]
-
-# Base models
-models = [
-    ('svr', SVR()),
-    ('dtr', DecisionTreeRegressor()),
-    ('lr',  LinearRegression())
-]
-
-# Final combiner  ← fixed: duplicate line removed from original
-model = StackingRegressor(
-    estimators=models,
-    final_estimator=KNeighborsRegressor(n_neighbors=2)
-)
-
-# Train
-model.fit(X, y)
-
-# Prediction
-print(model.predict([[5]]))
-
-
-================================================================================
-Stacking Regressor (With Train-Test Split & R2 Score)
-================================================================================
-
-from sklearn.ensemble import StackingRegressor
-from sklearn.svm import SVR
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-
-# Data
-X = [[1], [2], [3], [4], [5], [6], [7], [8]]
-y = [100, 150, 200, 250, 300, 350, 400, 450]
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-# Base models
-models = [
-    ('svr', SVR()),
-    ('dtr', DecisionTreeRegressor()),
-    ('lr',  LinearRegression())
-]
-
-# Final combiner
-model = StackingRegressor(
-    estimators=models,
-    final_estimator=KNeighborsRegressor(n_neighbors=2)
-)
-
-# Train
-model.fit(X_train, y_train)
-
-# Prediction
-y_pred = model.predict(X_test)
-
-# Accuracy
-accuracy = r2_score(y_test, y_pred)
-
-# Output
-print("Predicted Price:", model.predict([[5]]))
-print("Accuracy:", accuracy)
-
-
-================================================================================
-Bagging Regressor (Crop Data)
-================================================================================
-
-import numpy as np
-from sklearn.ensemble import BaggingRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-
-# Features: Rainfall, Temperature, Crop Variety (encoded)
-X = np.array([
-    [200, 30, 1], [180, 28, 2], [220, 32, 1], [190, 29, 3], [210, 31, 2],
-    [195, 30, 1], [205, 32, 3], [185, 28, 2], [225, 33, 1], [175, 27, 3]
-])
-y = np.array([52, 55, 53, 60, 58, 62, 65, 68, 70, 75])  # Crop Prices
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Train a Bagging Regressor with multiple Decision Trees
-# n_estimators=10: Uses 10 different Decision Trees for prediction.
-bagging = BaggingRegressor(estimator=DecisionTreeRegressor(), n_estimators=10, random_state=42)
-bagging.fit(X_train, y_train)
-y_pred_bagging = bagging.predict(X_test)
-
-# Print accuracy (R-squared score)  ← fixed: was printed before being calculated in original
-accuracy = r2_score(y_test, y_pred_bagging)
-print(f"Bagging Regressor Accuracy (R^2 Score): {accuracy:.2f}")
-
-# Bagging with Linear Regression:
-# from sklearn.linear_model import LinearRegression
-# bagging = BaggingRegressor(estimator=LinearRegression(), n_estimators=10, random_state=42)
-
-# Bagging with Support Vector Regression (SVR):
-# from sklearn.svm import SVR
-# bagging = BaggingRegressor(estimator=SVR(), n_estimators=10, random_state=42)
-
-# Bagging with KNN:
-# from sklearn.neighbors import KNeighborsRegressor
-# bagging = BaggingRegressor(estimator=KNeighborsRegressor(), n_estimators=10, random_state=42)
-
-
-================================================================================
-Voting Regressor (Parallel Ensemble)
-================================================================================
-
-# VotingRegressor combines predictions from different models by averaging their outputs
-from sklearn.ensemble import VotingRegressor
-from sklearn.svm import SVR
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import r2_score
-
-# Define different models
-model_1 = SVR()
-model_2 = DecisionTreeRegressor(random_state=42)
-
-# Create a Voting Regressor
-# list of tuples: ('name', model_object)
-voting = VotingRegressor(estimators=[('svr', model_1), ('dtr', model_2)])
-
-# Train the model (uses X_train, y_train from the Bagging Regressor cell above)
-voting.fit(X_train, y_train)
-
-# Predict and evaluate
-y_pred  = voting.predict(X_test)
-accuracy = r2_score(y_test, y_pred)
-print(f"Voting Regressor Accuracy (R^2 Score): {accuracy:.2f}")
-
-
-================================================================================
-Section 6: Clustering
-================================================================================
-
-
-================================================================================
-K-Means Clustering
-================================================================================
-
-import pandas as pd
-from sklearn.cluster import KMeans
-
-data = {
-    'Age':    [22, 25, 30, 35, 40, 45],
-    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
-}
-df = pd.DataFrame(data)
-print("Dataset:")
-print(df)
-
-# n_clusters=2 : 2 groups (clusters)
-kmeans = KMeans(n_clusters=2, random_state=0)
-df['Cluster'] = kmeans.fit_predict(df)
-# fit()    - train the model
-# predict  - assign each point to a cluster
-# df['Cluster'] - Create new column called 'Cluster'
-
-print("\nClustered Data:")
-print(df)
-# X and Y are features (coordinates); clusters assigned based on distance between points.
-
-
-================================================================================
-K-Medoids Clustering
-================================================================================
-
-!pip install scikit-learn-extra
-
-import pandas as pd
-from sklearn_extra.cluster import KMedoids
-
-data = {
-    'Age':    [22, 25, 30, 35, 40, 45],
-    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
-}
-df = pd.DataFrame(data)
-
-kmedoids = KMedoids(n_clusters=2, random_state=0)
-df['Cluster'] = kmedoids.fit_predict(df)
-print(df)
-
-
-================================================================================
-Agglomerative Clustering
-================================================================================
-
-import pandas as pd
-from sklearn.cluster import AgglomerativeClustering
-
-data = {
-    'Age':    [22, 25, 30, 35, 40, 45],
-    'Income': [20000, 22000, 30000, 35000, 40000, 45000]
-}
-df = pd.DataFrame(data)
-
-# AgglomerativeClustering - creates a clustering model
-agg = AgglomerativeClustering(n_clusters=2)
-df['Cluster'] = agg.fit_predict(df)
-print(df)
-
-
-================================================================================
-Section 7: Pandas — Exploratory Data Analysis (EDA)
-================================================================================
-
-import pandas as pd
-
-# Load the dataset
-data = pd.read_csv("/content/DEMO DATASET.csv")
-
-# Display first 5 rows of the dataset
-print(data.head())
-
-# Display first 2 rows of the dataset
-print(data.head(2))
-
-# Display last 5 rows of the dataset
-print(data.tail())
-
-# Display last 3 rows of the dataset
-print(data.tail(3))
-
-# Check number of rows and columns
-print("Dataset Shape:", data.shape)
-
-# Display column names
-print("Columns:", data.columns)
-
-# Check data types of each column
-print(data.dtypes)
-
-# Check for missing values in each column
-print("Missing Values:\n", data.isnull().sum())
-
-# Basic statistical summary
-print(data.describe())
-
-# Check duplicate rows
-print("Duplicate Rows:", data.duplicated().sum())
-
-import pandas as pd
-
-data = pd.read_csv("/content/TEST_NULL_DUPLICATE - Sheet2.csv")
-
-print(data.duplicated().sum())  # Count duplicate rows
-
-# Check for Missing values in each column
-print(data.isnull().sum())
-
-
-================================================================================
-Section 8: Pandas — DataFrame Operations
-================================================================================
-
-import pandas as pd
-import numpy as np
-# np.nan - Represents blank or empty value in a table.
-
-# Converts the dictionary into a DataFrame
-df = pd.DataFrame({
-    'Roll_No':    [101, 102, 103, 104, 105],
-    'Name':       ['Amit', 'Riya', 'Kunal', 'Sneha', 'Vikram'],
-    'Maths':      [78, 85, np.nan, 92, 88],
-    'Science':    [80, np.nan, 75, 89, 90],
-    'Attendance': [90, 95, 88, 92, 85]
-})
-df
-
-# Add a New Column
-df['Result'] = ['Pass', 'Pass', 'Fail', 'Pass', 'Pass']
-df
-
-df.insert(2, 'English', [50, 60, 70, 80, 75])
-df
-
-# Access Single Column
-df['Name']
-
-df[['Roll_No', 'Result']]  # Access Multiple Columns
-# Single bracket [ ]  - One column
-# Double bracket [[ ]] - Multiple columns
-
-# Add New Calculated Column
-df['Total'] = df['Maths'] + df['Science']
-# NOTE: Missing values (np.nan) will result in NaN total
-df
-
-# Add Column with Same Value for All
-df['College'] = 'GLS University'
-df
-
-df = df.assign(
-    total_eng_math=df['English'] + df['Maths'],
-    Grade=['B', 'A', 'C', 'A', 'B']
-)
-df
-
-# Finding the minimum, Maximum, Sum, Average and Count
-data = pd.DataFrame({
-    "Name":       ["Aarav", "Ishita", "Vihaan", "Ananya", "Devanshi"],
-    "Age":        [25, 22, 28, 21, 25],
-    "Salary":     [50000, 60000, 55000, 45000, 70000],
-    "Experience": [2, 3, 5, 1, 4]
-})
-data
-
-# Print min, max, sum, average, and count for the "Salary" column
-print('salary_min:', data["Salary"].min(), 'age_min:', data["Age"].min())
-print('salary_max:', data["Salary"].max())
-print('salary_sum:', data["Salary"].sum())
-print('salary_avg:', data["Salary"].mean())
-print('salary_count:', data["Salary"].count())
-# .count() - counts how many NON-MISSING (non-NaN) values are present in a column.
-
-# Find unique values in each column
-unique_names  = data["Name"].unique()
-unique_ages   = data["Age"].unique()
-unique_salary = data["Salary"].unique()
-
-# Print the unique values for each column
-print("Unique Names:",  unique_names)
-print("Unique Ages:",   unique_ages)
-print("unique Salary:", unique_salary)
-
-# Increase Salary by 5000 for everyone
-data['Salary'] = data['Salary'] + 5000
-data
-
-# Replace: Change Old value without any condition
-# condition based value change: LOC
-data['Salary'] = data['Salary'].replace(75000, 50000)
-data
-
-data['Age'] = data['Age'].replace(25, 27)
-data
-
-# Replace Multiple values: {old_value: new_value}
-data['Age'] = data['Age'].replace({21: 22, 22: 23})
-data
-
-
-================================================================================
-Section 9: Pandas — Missing Values Handling
-================================================================================
-
-import pandas as pd
-import numpy as np
-
-# House sales dataset with missing values
-house_data = pd.DataFrame({
-    "House_ID":  [101, 102, 103, 104, 105],
-    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
-    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
-    "Bedrooms":  [3, 4, 3, np.nan, 2]
-})
-print(house_data)
-
-# Fill missing values with one constant value
-house_data.fillna(0)
-
-house_data_1 = pd.DataFrame({
-    "House_ID":  [101, 102, 103, 104, 105],
-    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
-    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
-    "Bedrooms":  [3, 4, 3, np.nan, 2]
-})
-house_data_1
-
-# Forward fill (ffill) - fills NaN with the previous valid value
-house_data_1.ffill()
-
-house_data_2 = pd.DataFrame({
-    "House_ID":  [101, 102, 103, 104, 105],
-    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
-    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
-    "Bedrooms":  [3, 4, 3, np.nan, 2]
-})
-house_data_2
-
-# Backward fill (bfill) - fills NaN with the next valid value
-house_data_2.bfill()
-
-import pandas as pd
-import numpy as np
-
-house_salesdata = pd.DataFrame({
-    "House_ID":  [101, 102, 103, 104, 105],
-    "Area_sqft": [1200, np.nan, 1500, 1300, np.nan],
-    "Price":     [5000000, 6000000, np.nan, 5500000, np.nan],
-    "Bedrooms":  [3, 4, 3, np.nan, 2]
-})
-print(house_salesdata)
-
-area_mean     = house_salesdata['Area_sqft'].mean()   # (1200 + 1500 + 1300)/3 = 1333.33
-price_mean    = house_salesdata['Price'].mean()       # (5000000 + 6000000 + 5500000)/3 = 5500000
-bedrooms_mean = house_salesdata['Bedrooms'].mean()    # (3 + 4 + 3 + 2)/4 = 3.0
-
-# Fill Missing Values with Mean values
-house_salesdata['Area_sqft'] = house_salesdata['Area_sqft'].fillna(area_mean)
-house_salesdata['Price']     = house_salesdata['Price'].fillna(price_mean)
-house_salesdata['Bedrooms']  = house_salesdata['Bedrooms'].fillna(bedrooms_mean)
-print(house_salesdata)
-
-# Column-specific fill (alternative methods):
-# house_data['Area_sqft'] = house_data['Area_sqft'].fillna(house_data['Area_sqft'].mean())
-# house_data['Price']     = house_data['Price'].fillna(5500000)
-# house_data['Bedrooms']  = house_data['Bedrooms'].fillna(3)
-# house_data['Bedrooms']  = house_data['Bedrooms'].fillna(house_data['Bedrooms'].mode()[0])
-# print(house_data)
-
-import pandas as pd
-
-cropsampledata = pd.DataFrame({
-    "Crop":       ["Wheat", "Rice", "Maize", "Wheat", "Soybean"],
-    "Area_acres": [100, 120, 150, 100, 120]
-})
-cropsampledata
-
-# Get mode of Area_acres
-mode_value = cropsampledata['Area_acres'].mode()
-print(mode_value)
-
-mode_value = cropsampledata['Area_acres'].mode()[0]
-print(mode_value)
-
-import pandas as pd
-import numpy as np
-from sklearn.impute import KNNImputer
-
-# Crop dataset with missing values
-crop_data = pd.DataFrame({
-    "Crop":          ["Wheat", "Rice", "Maize", "Barley", "Soybean"],
-    "Area_acres":    [100, np.nan, 150, 120, np.nan],
-    "Yield_tons":    [30, 40, np.nan, 35, 25],
-    "Fertilizer_kg": [200, 250, 220, np.nan, np.nan]
-})
-print(crop_data)
-
-# Print crops with Area_acres greater than 120:
-filtered_data = crop_data[crop_data["Area_acres"] > 120]
-print(filtered_data)
-
-# Select crops where Area_acres > 100 AND Yield_tons > 30
-crop_data[(crop_data["Area_acres"] > 100) & (crop_data["Yield_tons"] > 30)]
-
-# Select crops where Area_acres > 140 OR Yield_tons < 30
-crop_data[(crop_data["Area_acres"] > 140) | (crop_data["Yield_tons"] < 30)]
-
-# Select crops where Yield_tons is NOT greater than 30
-crop_data[~(crop_data["Yield_tons"] > 30)]
-
-import pandas as pd
-
-data = pd.DataFrame({
-    "Fruit":    ["Apple", "Banana", "Orange", "Grapes"],
-    "Quantity": [10, 5, 8, 12],
-    "Price":    [100, 50, 80, 120]
-})
-print("Original DataFrame:")
-print(data)
-
-del data["Quantity"]  # deletes the column, not rows
-
-# Keep only rows where Price >= 100
-data = data[data["Price"] >= 100]
-print(data)
-
-import pandas as pd
-
-data = pd.DataFrame({
-    "Fruit":    ["Apple", "Banana", "Orange", "Grapes"],
-    "Quantity": [10, 5, 8, 12],
-    "Price":    [100, 50, 80, 120]
-})
-print("Original DataFrame:")
-print(data)
-
-# Export to CSV
-data.to_csv("fruits.csv")
-
-import os
-print(os.getcwd())  # Shows the current folder
-
-import pandas as pd
-
-data = {
-    'A': [10, 20, None, 10, None],
-    'B': [1, 2, 3, 4, 5]
-}
-df = pd.DataFrame(data)
-print(df)
-
-df['A'].mode()
-
-df['A'] = df['A'].fillna(df['A'].mode()[0])
-print(df)
-
-
-================================================================================
-Section 10: KNN Imputer & Preprocessing (Scaling + Encoding)
-================================================================================
-
-import pandas as pd
-from sklearn.impute import KNNImputer
-
-df = pd.DataFrame({
-    'Maths':   [80, 90, None, 70],
-    'Science': [85, None, 88, 75]
-})
-print(df)
-
-df[:] = KNNImputer(n_neighbors=2).fit_transform(df)
-# Works only for numerical data
-# df[:]   → all rows, all columns
-# df[:3]  → first 3 rows, all columns
-# df[1:4] → rows from index position 1 to 3, all columns
-# fit       - learns distances
-# transform - replaces missing values using KNN logic
-print(df)
-
 from sklearn.preprocessing import StandardScaler
-# StandardScaler transforms data to z-scores (mean=0, std=1)
 
-df = pd.DataFrame({
-    'Maths':   [80, 90, None, 70],
-    'Science': [85, None, 88, 75]
-})
-print(df)
+data = load_breast_cancer()
+X, y = data.data, data.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 scaler = StandardScaler()
-df_scaled = scaler.fit_transform(df)
-print(df_scaled)
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+# Convert NumPy arrays to PyTorch tensors
+X_train = torch.tensor(X_train, dtype=torch.float32)
+X_test = torch.tensor(X_test, dtype=torch.float32)
 
-df = pd.DataFrame({
-    'Age':    [25, 30, 35, 40],
-    'Salary': [50000, 52000, 58000, 60000]
-})
-print("Original Data:")
-print(df)
-
-Minmax = MinMaxScaler()
-df_scaled = Minmax.fit_transform(df)
-print(df_scaled)
-
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-
-data = {
-    'Crop_Name': ['Wheat', 'Rice', 'Cotton', 'Rice', 'Wheat']
-}
-df = pd.DataFrame(data)
-print(df)
-
-le = LabelEncoder()
-df['Crop_Encoded'] = le.fit_transform(df['Crop_Name'])
-print(df)
-
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-
-data = {
-    'Crop_Name': ['Wheat', 'Rice', 'Cotton', 'Rice', 'Wheat'],
-    'Month':     ['Winter', 'Summer', 'Summer', 'Winter', 'Winter']
-}
-df = pd.DataFrame(data)
-
-le = LabelEncoder()
-for col in df.columns:   # ← fixed: original had 'df columns' (missing dot)
-    df[col] = le.fit_transform(df[col])
-print(df)
+y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
+y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 
-================================================================================
-Section 11: Pandas — Demo Dataset EDA & Drop Operations
-================================================================================
+class Perceptron(nn.Module):
+    def __init__(self, input_features):
+        super().__init__()
 
-import pandas as pd
+        self.linear = nn.Linear(input_features, 1)
 
-# Load the dataset
-data = pd.read_csv("/content/DEMO DATASET (1).csv")
-print(data)
+    def forward(self, x):
+        return torch.sigmoid(self.linear(x))
 
-# Display first 5 rows of the dataset
-print(data.head())
 
-# Display first 2 rows of the dataset
-print(data.head(2))
+model = Perceptron(X_train.shape[1])
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+criterion = nn.BCELoss()
 
-# Display last 5 rows of the dataset
-print(data.tail())
+# Training
+for epoch in range(30):
+    outputs = model(X_train)
+    loss = criterion(outputs, y_train)
 
-# Display last 3 rows of the dataset
-print(data.tail(3))
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-# Check number of rows and columns
-print("Dataset Shape:", data.shape)
+    print(f"Epoch: {epoch + 1}, Loss: {loss.item()}")
 
-# Display column names
-print("Columns:", data.columns)
+# Testing
+with torch.no_grad():
+    outputs = model(X_test)
+    predictions = (outputs > 0.5).float()
 
-# Check data types of each column
-print(data.dtypes)
+y_true = y_test.numpy()
+y_pred = predictions.numpy()
 
-# Check for missing values in each column
-print("Missing Values:\n", data.isnull().sum())
+# Accuracy
+accuracy = accuracy_score(y_true, y_pred)
 
-# Basic statistical summary
-print(data.describe())
+print("\n--- Performance Evaluation ---")
+print("Accuracy:", accuracy)
 
-# Check duplicate rows
-print("Duplicate Rows:", data.duplicated().sum())
+-------------------------------------------------------
 
-# Dataset information (data types, non-null count)
-data.info()
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms
+import matplotlib.pyplot as plt
 
-# Total number of values
-print("Total values (data.size):", data.size)
+# Device
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-import pandas as pd
+transform = transforms.ToTensor()
 
-data = pd.read_csv("/content/DEMO DATASET (1).csv")
+# MNIST dataset
+train_data = datasets.MNIST(
+    './data',
+    download=True,
+    train=True,
+    transform=transform
+)
 
-print(data.duplicated().sum())  # Count duplicate rows
+test_data = datasets.MNIST(
+    './data',
+    download=True,
+    train=False,
+    transform=transform
+)
 
-# Check for Missing values in each column
-print(data.isnull().sum())
+train_loader = torch.utils.data.DataLoader(
+    train_data,
+    batch_size=64,
+    shuffle=True
+)
 
-print(data['Min Price (₹/Qtl)'].mean())
-print(data['Min Price (₹/Qtl)'].median())
-print(data['Min Price (₹/Qtl)'].mode())
+test_loader = torch.utils.data.DataLoader(
+    test_data,
+    batch_size=64,
+    shuffle=False
+)
 
-# Rename column Syntax:
-# df.rename(columns={'old_name1': 'new_name1', 'old_name2': 'new_name2'}, inplace=False)
-# inplace=False → keeps the original DataFrame unchanged and returns a new one.
-# inplace=True  → updates the original DataFrame directly.
-# By default, if you don't pass inplace, it is False.
 
-# Rename columns
-data.rename(columns={'old_name1': 'new_name1', 'old_name2': 'new_name2'})
+# Function to add noise
+def add_noise(images):
+    noise = torch.randn_like(images) * 0.5
+    noisy_images = images + noise
 
-# drop() removes rows or columns by label
-# dropna() removes rows or columns containing missing values (NaN)
-# axis=0 = remove rows | axis=1 = remove columns
-# inplace=True  → modify original DataFrame directly
-# inplace=False → return new DataFrame (default)
+    return torch.clamp(noisy_images, 0, 1)
 
-data.drop('Market', axis=1)        # drops column 'Market'
 
-data.drop(2, axis=0)  # drops row with index 2  (axis=0 means row)
+# Autoencoder
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super().__init__()
 
-# data.dropna(axis=0)  # drops rows with any missing value
-# data.dropna(axis=1)  # drops columns with any missing value
-data.dropna()
+        self.encoder = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(28 * 28, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU()
+        )
+
+        self.decoder = nn.Sequential(
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, 28 * 28),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        x = x.view(-1, 1, 28, 28)
+
+        return x
+
+
+model = Autoencoder().to(device)
+
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+
+# Training
+model.train()
+
+for epoch in range(10):
+    total_loss = 0
+
+    for images, _ in train_loader:
+
+        images = images.to(device)
+
+        # Add noise
+        noisy_images = add_noise(images)
+
+        # Reconstruction
+        outputs = model(noisy_images)
+
+        # Compare reconstructed image with original clean image
+        loss = criterion(outputs, images)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    print(
+        f"Epoch: {epoch + 1}, "
+        f"Loss: {total_loss / len(train_loader):.4f}"
+    )
+
+
+# Testing
+model.eval()
+
+with torch.no_grad():
+
+    # Get one batch
+    images, _ = next(iter(test_loader))
+
+    images = images.to(device)
+
+    # Add noise
+    noisy_images = add_noise(images)
+
+    # Denoise
+    denoised_images = model(noisy_images)
+
+
+# Move tensors to CPU for matplotlib
+images = images.cpu()
+noisy_images = noisy_images.cpu()
+denoised_images = denoised_images.cpu()
+
+
+# Display results
+plt.figure(figsize=(15, 5))
+
+for i in range(10):
+
+    # Noisy
+    plt.subplot(3, 10, i + 1)
+    plt.imshow(noisy_images[i].squeeze(), cmap='gray')
+    plt.axis('off')
+    plt.title('Noisy')
+
+    # Original
+    plt.subplot(3, 10, i + 11)
+    plt.imshow(images[i].squeeze(), cmap='gray')
+    plt.axis('off')
+    plt.title('Original')
+
+    # Denoised
+    plt.subplot(3, 10, i + 21)
+    plt.imshow(denoised_images[i].squeeze(), cmap='gray')
+    plt.axis('off')
+    plt.title('Denoised')
+
+plt.tight_layout()
+plt.show()
+
+---------------------------------------------------------
+
+# Variational Autoencoder for MNIST
+# Simple PyTorch Implementation
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision.datasets import MNIST
+from torchvision import transforms
+import matplotlib.pyplot as plt
+
+
+# --------------------------------------------------
+# 1. Device
+# --------------------------------------------------
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print("Device:", device)
+
+
+# --------------------------------------------------
+# 2. MNIST Dataset
+# --------------------------------------------------
+
+train_data = MNIST(
+    "./data",
+    train=True,
+    download=True,
+    transform=transforms.ToTensor()
+)
+
+train_loader = torch.utils.data.DataLoader(
+    train_data,
+    batch_size=128,
+    shuffle=True
+)
+
+
+# --------------------------------------------------
+# 3. VAE Model
+# --------------------------------------------------
+
+class VAE(nn.Module):
+
+    def __init__(self):
+
+        super().__init__()
+
+        # Encoder
+        self.encoder = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(784, 400),
+            nn.ReLU(),
+            nn.Linear(400, 200),
+            nn.ReLU()
+        )
+
+        # Latent space
+        self.fc_mu = nn.Linear(200, 20)
+        self.fc_logvar = nn.Linear(200, 20)
+
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.Linear(20, 200),
+            nn.ReLU(),
+            nn.Linear(200, 400),
+            nn.ReLU(),
+            nn.Linear(400, 784),
+            nn.Sigmoid()
+        )
+
+
+    # Reparameterization trick
+    def reparameterize(self, mu, logvar):
+
+        std = torch.exp(0.5 * logvar)
+
+        epsilon = torch.randn_like(std)
+
+        z = mu + epsilon * std
+
+        return z
+
+
+    def forward(self, x):
+
+        # Encoder
+        x = self.encoder(x)
+
+        # Mean and log variance
+        mu = self.fc_mu(x)
+        logvar = self.fc_logvar(x)
+
+        # Sample latent vector
+        z = self.reparameterize(mu, logvar)
+
+        # Decoder
+        output = self.decoder(z)
+
+        return output, mu, logvar
+
+
+# --------------------------------------------------
+# 4. Create Model
+# --------------------------------------------------
+
+model = VAE().to(device)
+
+optimizer = optim.Adam(
+    model.parameters(),
+    lr=0.001
+)
+
+
+# --------------------------------------------------
+# 5. VAE Loss
+# --------------------------------------------------
+
+def vae_loss(output, images, mu, logvar, beta):
+
+    images = images.view(-1, 784)
+
+    # Reconstruction loss
+    reconstruction_loss = nn.functional.binary_cross_entropy(
+        output,
+        images,
+        reduction="sum"
+    )
+
+    # KL Divergence
+    kl_loss = -0.5 * torch.sum(
+        1 + logvar - mu.pow(2) - logvar.exp()
+    )
+
+    # Total loss
+    loss = reconstruction_loss + beta * kl_loss
+
+    # Average over batch
+    return loss / images.size(0)
+
+
+# --------------------------------------------------
+# 6. Training
+# --------------------------------------------------
+
+epochs = 10
+
+for epoch in range(epochs):
+
+    model.train()
+
+    total_loss = 0
+
+    # Gradually increase KL weight
+    # Helps the VAE learn good reconstructions first
+    # and then learn a proper latent distribution.
+
+    beta = min(1.0, (epoch + 1) / 10)
+
+    for images, _ in train_loader:
+
+        images = images.to(device)
+
+        # Forward pass
+        output, mu, logvar = model(images)
+
+        # Loss
+        loss = vae_loss(
+            output,
+            images,
+            mu,
+            logvar,
+            beta
+        )
+
+        # Backpropagation
+        optimizer.zero_grad()
+
+        loss.backward()
+
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(train_loader)
+
+    print(
+        f"Epoch [{epoch + 1}/{epochs}] "
+        f"Loss: {avg_loss:.2f} "
+        f"Beta: {beta:.2f}"
+    )
+
+
+# --------------------------------------------------
+# 7. Generate New Digits
+# --------------------------------------------------
+
+model.eval()
+
+with torch.no_grad():
+
+    # Random samples from standard normal distribution
+    z = torch.randn(10, 20).to(device)
+
+    # Decode
+    generated_images = model.decoder(z)
+
+    # Reshape to 28 x 28
+    generated_images = generated_images.view(
+        -1, 1, 28, 28
+    )
+
+    generated_images = generated_images.cpu()
+
+
+# --------------------------------------------------
+# 8. Display Generated Images
+# --------------------------------------------------
+
+plt.figure(figsize=(8, 4))
+
+for i in range(10):
+
+    plt.subplot(2, 5, i + 1)
+
+    plt.imshow(
+        generated_images[i].squeeze(),
+        cmap="gray"
+    )
+
+    plt.axis("off")
+    plt.title("Generated")
+
+plt.tight_layout()
+plt.show()
+
+-----------------------------------------------------
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# --------------------------------------------------
+# 1. Device
+# --------------------------------------------------
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Device:", device)
+
+
+# --------------------------------------------------
+# 2. Fashion MNIST
+# --------------------------------------------------
+
+transform = transforms.ToTensor()
+
+train_data = datasets.FashionMNIST(
+    "./data",
+    train=True,
+    download=True,
+    transform=transform
+)
+
+test_data = datasets.FashionMNIST(
+    "./data",
+    train=False,
+    download=True,
+    transform=transform
+)
+
+train_loader = DataLoader(
+    train_data,
+    batch_size=128,
+    shuffle=True
+)
+
+test_loader = DataLoader(
+    test_data,
+    batch_size=128,
+    shuffle=False
+)
+
+
+# --------------------------------------------------
+# 3. CNN Model
+# --------------------------------------------------
+
+class CNN(nn.Module):
+
+    def __init__(self, dropout=False):
+        super().__init__()
+
+        self.features = nn.Sequential(
+
+            # Layer 1
+            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            # Layer 2
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            # Layer 3
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+
+            # Layer 4
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(),
+
+            nn.MaxPool2d(2)
+        )
+
+        self.dropout = nn.Dropout(0.5) if dropout else nn.Identity()
+
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(256 * 3 * 3, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.dropout(x)
+        x = self.classifier(x)
+        return x
+
+
+# --------------------------------------------------
+# 4. Train + Test function
+# --------------------------------------------------
+
+def train_model(model, l1=False, l2=False, epochs=5):
+
+    model = model.to(device)
+
+    loss_fn = nn.CrossEntropyLoss()
+
+    # L2 is implemented using weight_decay
+    if l2:
+        optimizer = optim.Adam(
+            model.parameters(),
+            lr=0.001,
+            weight_decay=0.0001
+        )
+    else:
+        optimizer = optim.Adam(
+            model.parameters(),
+            lr=0.001
+        )
+
+    for epoch in range(epochs):
+
+        model.train()
+
+        correct = 0
+        total = 0
+
+        for images, labels in train_loader:
+
+            images = images.to(device)
+            labels = labels.to(device)
+
+            output = model(images)
+
+            loss = loss_fn(output, labels)
+
+            # L1 regularization
+            if l1:
+                l1_loss = 0
+
+                for parameter in model.parameters():
+                    l1_loss += torch.sum(torch.abs(parameter))
+
+                loss = loss + 0.00001 * l1_loss
+
+            optimizer.zero_grad()
+
+            loss.backward()
+
+            optimizer.step()
+
+            # Training accuracy
+            predictions = output.argmax(dim=1)
+
+            total += labels.size(0)
+            correct += (predictions == labels).sum().item()
+
+        train_accuracy = 100 * correct / total
+
+        print(
+            f"Epoch {epoch + 1}/{epochs} "
+            f"- Train Accuracy: {train_accuracy:.2f}%"
+        )
+
+    # --------------------------------------------------
+    # Test
+    # --------------------------------------------------
+
+    model.eval()
+
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+
+        for images, labels in test_loader:
+
+            images = images.to(device)
+            labels = labels.to(device)
+
+            output = model(images)
+
+            predictions = output.argmax(dim=1)
+
+            total += labels.size(0)
+            correct += (predictions == labels).sum().item()
+
+    test_accuracy = 100 * correct / total
+
+    return train_accuracy, test_accuracy
+
+
+# --------------------------------------------------
+# 5. Run all 5 models
+# --------------------------------------------------
+
+results = {}
+
+
+# A. Base Model
+print("\n==============================")
+print("A. BASE MODEL")
+print("==============================")
+
+model = CNN(dropout=False)
+
+train_acc, test_acc = train_model(model)
+
+results["Base"] = (train_acc, test_acc)
+
+
+# B. L1 Regularization
+print("\n==============================")
+print("B. L1 REGULARIZATION")
+print("==============================")
+
+model = CNN(dropout=False)
+
+train_acc, test_acc = train_model(
+    model,
+    l1=True
+)
+
+results["L1"] = (train_acc, test_acc)
+
+
+# C. L2 Regularization
+print("\n==============================")
+print("C. L2 REGULARIZATION")
+print("==============================")
+
+model = CNN(dropout=False)
+
+train_acc, test_acc = train_model(
+    model,
+    l2=True
+)
+
+results["L2"] = (train_acc, test_acc)
+
+
+# D. Dropout
+print("\n==============================")
+print("D. DROPOUT")
+print("==============================")
+
+model = CNN(dropout=True)
+
+train_acc, test_acc = train_model(model)
+
+results["Dropout"] = (train_acc, test_acc)
+
+
+# E. L2 + Dropout
+print("\n==============================")
+print("E. L2 + DROPOUT")
+print("==============================")
+
+model = CNN(dropout=True)
+
+train_acc, test_acc = train_model(
+    model,
+    l2=True
+)
+
+results["L2 + Dropout"] = (train_acc, test_acc)
+
+
+# --------------------------------------------------
+# 6. Final Results
+# --------------------------------------------------
+
+print("\n\n==============================")
+print("FINAL RESULTS")
+print("==============================")
+
+print(
+    f"{'Model':<20}"
+    f"{'Train Accuracy':<20}"
+    f"{'Test Accuracy'}"
+)
+
+for name, (train_acc, test_acc) in results.items():
+
+    print(
+        f"{name:<20}"
+        f"{train_acc:.2f}%{'':<14}"
+        f"{test_acc:.2f}%"
+    )
