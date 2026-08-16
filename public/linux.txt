@@ -792,3 +792,977 @@ for name, (train_acc, test_acc) in results.items():
         f"{train_acc:.2f}%{'':<14}"
         f"{test_acc:.2f}%"
     )
+
+----------------------------------------------------------------
+██████████████████████████████████████████████████████████████████████
+DLL Exam Preparation Notebook
+██████████████████████████████████████████████████████████████████████
+
+══════════════════════════════════════════════════════════════════════
+TOPICS: NEURAL NETWORKS · MLP · FEEDFORWARD & BACKPROP · AUTOENCODERS · VAE · CNN
+══════════════════════════════════════════════════════════════════════
+
+══════════════════════════════════════════════════════════════════════
+SECTION 1: NEURAL NETWORKS
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q1. Implement a Single Neuron from Scratch
+──────────────────────────────────────────────────────────────────────
+
+def step_function(x):
+    return 1 if x >= 0 else 0
+
+
+def single_neuron(inputs, weights, bias):
+    # Weighted sum
+    total = 0
+    for i in range(len(inputs)):
+        total += inputs[i] * weights[i]
+
+    total += bias
+
+    # Activation
+    output = step_function(total)
+    return output
+
+
+x = [1, 0, 1]
+w = [0.5, -0.6, 0.8]
+b = -0.2
+
+print("Output:", single_neuron(x, w, b))
+
+
+──────────────────────────────────────────────────────────────────────
+Q2. Implement AND and OR Logical Gates using a Single-Layer Perceptron
+──────────────────────────────────────────────────────────────────────
+
+def step_function(x):
+    return 1 if x >= 0 else 0
+
+
+def perceptron(x1, x2, w1, w2, b):
+    z = x1 * w1 + x2 * w2 + b
+    return step_function(z)
+
+
+def AND(x1, x2):
+    return perceptron(x1, x2, w1=1, w2=1, b=-1.5)
+
+
+def OR(x1, x2):
+    return perceptron(x1, x2, w1=1, w2=1, b=-0.5)
+
+
+# AND Gate
+print("AND Gate:")
+print(AND(0, 0), AND(0, 1), AND(1, 0), AND(1, 1))   # 0 0 0 1
+
+# OR Gate
+print("OR Gate:")
+print(OR(0, 0), OR(0, 1), OR(1, 0), OR(1, 1))        # 0 1 1 1
+
+
+══════════════════════════════════════════════════════════════════════
+SECTION 2: SINGLE LAYER PERCEPTRON
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q3. Binary Classification using Single Layer Perceptron — Breast Cancer Dataset
+──────────────────────────────────────────────────────────────────────
+
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Perceptron
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# 1. Load Dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target  # 0 = malignant, 1 = benign
+
+print("Shape:", X.shape, y.shape)
+
+# 2. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 3. Scale Features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test  = scaler.transform(X_test)
+
+# 4. Train Perceptron
+model = Perceptron(max_iter=1000, eta0=0.01, random_state=42, tol=1e-3)
+model.fit(X_train, y_train)
+
+# 5. Predict
+y_pred = model.predict(X_test)
+
+# 6. Evaluate
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+
+══════════════════════════════════════════════════════════════════════
+SECTION 3: MULTILAYER PERCEPTRON (MLP)
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q4. MLP with Hidden Layer to Solve XOR Problem (Non-linear Activation)
+──────────────────────────────────────────────────────────────────────
+
+import numpy as np
+import tensorflow as tf
+
+# XOR dataset
+X = np.array([[0, 0],
+              [0, 1],
+              [1, 0],
+              [1, 1]], dtype=np.float32)
+
+y = np.array([[0],
+              [1],
+              [1],
+              [0]], dtype=np.float32)
+
+# Build MLP model (2 -> 2 -> 1)
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(2, activation='sigmoid', input_shape=(2,)),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+# Compile
+model.compile(
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train
+model.fit(X, y, epochs=500, verbose=0)
+
+# Predictions
+predictions = model.predict(X)
+print("Raw Predictions:")
+print(predictions)
+
+print("\nBinary Predictions:")
+print((predictions > 0.5).astype(int))
+
+
+──────────────────────────────────────────────────────────────────────
+Q5. MLP for MNIST Digit Classification (Feedforward + Backpropagation)
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras import layers, models
+from sklearn.metrics import confusion_matrix, classification_report
+
+# 1. Load MNIST dataset
+(X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+# 2. Preprocess
+X_train = X_train.astype("float32") / 255.0
+X_test  = X_test.astype("float32") / 255.0
+
+X_train = X_train.reshape(-1, 784)
+X_test  = X_test.reshape(-1, 784)
+
+# 3. Build MLP Model (Feedforward)
+model = models.Sequential([
+    layers.Dense(256, activation="relu", input_shape=(784,)),
+    layers.Dense(128, activation="relu"),
+    layers.Dense(64,  activation="relu"),
+    layers.Dense(10,  activation="softmax")
+])
+
+# 4. Compile (Adam + backpropagation internally)
+model.compile(
+    optimizer="adam",
+    loss="sparse_categorical_crossentropy",
+    metrics=["accuracy"]
+)
+
+# 5. Train
+history = model.fit(
+    X_train, y_train,
+    epochs=10,
+    batch_size=128,
+    validation_split=0.2,
+    verbose=1
+)
+
+# 6. Evaluate
+test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
+print("\nTest Accuracy:", test_acc)
+
+# 7. Predictions
+y_pred = np.argmax(model.predict(X_test), axis=1)
+
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+
+──────────────────────────────────────────────────────────────────────
+Q6. Feedforward NN — Compare SGD vs Adam Optimizer
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+
+# Load MNIST
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+# Normalize
+x_train = x_train / 255.0
+x_test  = x_test  / 255.0
+
+
+# Function to create model
+def create_model():
+    model = Sequential([
+        Flatten(input_shape=(28, 28)),
+        Dense(128, activation='relu'),
+        Dense(64,  activation='relu'),
+        Dense(32,  activation='relu'),
+        Dense(10,  activation='softmax')
+    ])
+    return model
+
+
+# ── SGD Optimizer ──────────────────────────────
+model_sgd = create_model()
+model_sgd.compile(
+    optimizer='sgd',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+print("Training with SGD...")
+model_sgd.fit(x_train, y_train, epochs=5, batch_size=32,
+              validation_split=0.2, verbose=1)
+
+sgd_loss, sgd_acc = model_sgd.evaluate(x_test, y_test, verbose=0)
+print("SGD Test Accuracy:", sgd_acc)
+
+
+# ── Adam Optimizer ─────────────────────────────
+model_adam = create_model()
+model_adam.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+print("\nTraining with Adam...")
+model_adam.fit(x_train, y_train, epochs=5, batch_size=32,
+               validation_split=0.2, verbose=1)
+
+adam_loss, adam_acc = model_adam.evaluate(x_test, y_test, verbose=0)
+print("Adam Test Accuracy:", adam_acc)
+
+
+# ── Comparison ─────────────────────────────────
+print("\nComparison")
+print("SGD  Accuracy:", sgd_acc)
+print("Adam Accuracy:", adam_acc)
+
+
+──────────────────────────────────────────────────────────────────────
+Q7. MLP with Hyperparameter Tuning (GridSearchCV) — Breast Cancer Dataset
+──────────────────────────────────────────────────────────────────────
+
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# 1. Load Dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+# 2. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 3. Pipeline (Scaling + MLP)
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),
+    ("mlp", MLPClassifier(max_iter=2000, random_state=42))
+])
+
+# 4. Hyperparameter Grid
+param_grid = {
+    "mlp__hidden_layer_sizes": [(10,), (50,), (100,), (50, 50), (100, 50)],
+    "mlp__activation":         ["relu", "tanh"],
+    "mlp__alpha":              [0.0001, 0.001, 0.01],
+    "mlp__learning_rate_init": [0.001, 0.01],
+    "mlp__solver":             ["adam", "sgd"]
+}
+
+# 5. Grid Search CV
+grid_search = GridSearchCV(
+    pipeline, param_grid,
+    cv=5, n_jobs=-1, scoring="accuracy", verbose=1
+)
+grid_search.fit(X_train, y_train)
+
+print("\nBest Parameters:")
+print(grid_search.best_params_)
+
+# 6. Best Model Evaluation
+best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
+
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+
+══════════════════════════════════════════════════════════════════════
+SECTION 4: AUTOENCODERS
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q8. Denoising Autoencoder — Remove Noise from Images
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.models import Model
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Load MNIST
+(x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
+
+# 2. Normalize
+x_train = x_train / 255.0
+x_test  = x_test  / 255.0
+
+# 3. Add random noise
+noise_factor = 0.5
+x_train_noisy = x_train + noise_factor * np.random.normal(size=x_train.shape)
+x_test_noisy  = x_test  + noise_factor * np.random.normal(size=x_test.shape)
+
+x_train_noisy = np.clip(x_train_noisy, 0., 1.)
+x_test_noisy  = np.clip(x_test_noisy,  0., 1.)
+
+# 4. Build Autoencoder
+input_img = Input(shape=(28, 28))
+x = Flatten()(input_img)
+x = Dense(128, activation='relu')(x)
+x = Dense(64,  activation='relu')(x)    # Bottleneck
+x = Dense(128, activation='relu')(x)
+x = Dense(784, activation='sigmoid')(x)
+output = Reshape((28, 28))(x)
+
+autoencoder = Model(input_img, output)
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+
+# 5. Train  (input: noisy, target: clean)
+autoencoder.fit(
+    x_train_noisy, x_train,
+    epochs=10,
+    batch_size=256,
+    validation_data=(x_test_noisy, x_test)
+)
+
+# 6. Predict denoised images
+decoded_imgs = autoencoder.predict(x_test_noisy)
+
+# 7. Display results
+plt.figure(figsize=(9, 3))
+for i in range(3):
+    plt.subplot(3, 3, i+1)
+    plt.imshow(x_test_noisy[i], cmap='gray')
+    plt.title("Noisy"); plt.axis('off')
+
+    plt.subplot(3, 3, i+4)
+    plt.imshow(decoded_imgs[i], cmap='gray')
+    plt.title("Denoised"); plt.axis('off')
+
+    plt.subplot(3, 3, i+7)
+    plt.imshow(x_test[i], cmap='gray')
+    plt.title("Original"); plt.axis('off')
+
+plt.show()
+
+
+──────────────────────────────────────────────────────────────────────
+Q9. Dimensionality Reduction Autoencoder — Extract Low-Dimensional Latent Features
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.models import Model
+
+# 1. Load MNIST
+(x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
+
+# 2. Normalize
+x_train = x_train / 255.0
+x_test  = x_test  / 255.0
+
+# 3. Encoder  (784 → 128 → 32 latent)
+input_img = Input(shape=(28, 28))
+x = Flatten()(input_img)
+x = Dense(128, activation='relu')(x)
+latent = Dense(32, activation='relu')(x)   # Low-dimensional features
+
+# 4. Decoder  (32 → 128 → 784)
+x = Dense(128, activation='relu')(latent)
+x = Dense(784, activation='sigmoid')(x)
+output = Reshape((28, 28))(x)
+
+# 5. Models
+autoencoder = Model(input_img, output)
+encoder     = Model(input_img, latent)   # Separate encoder to extract features
+
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+
+# 6. Train
+autoencoder.fit(
+    x_train, x_train,
+    epochs=5,
+    batch_size=256,
+    validation_data=(x_test, x_test)
+)
+
+# 7. Extract latent features
+latent_features = encoder.predict(x_test)
+
+print("Original image shape :", x_test.shape)          # (10000, 28, 28)
+print("Latent features shape :", latent_features.shape) # (10000, 32)
+
+
+──────────────────────────────────────────────────────────────────────
+Q10. Image Compression Autoencoder
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.models import Model
+
+# 1. Load MNIST
+(x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
+
+# 2. Normalize
+x_train = x_train / 255.0
+x_test  = x_test  / 255.0
+
+# 3. Encoder (Compression)
+input_img = Input(shape=(28, 28))
+x = Flatten()(input_img)
+x = Dense(128, activation='relu')(x)
+encoded = Dense(32, activation='relu')(x)   # Compressed representation
+
+# 4. Decoder (Reconstruction)
+x = Dense(128, activation='relu')(encoded)
+x = Dense(784, activation='sigmoid')(x)
+decoded = Reshape((28, 28))(x)
+
+# 5. Models
+autoencoder = Model(input_img, decoded)
+encoder     = Model(input_img, encoded)
+
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+
+# 6. Train
+autoencoder.fit(
+    x_train, x_train,
+    epochs=5,
+    batch_size=256,
+    validation_data=(x_test, x_test)
+)
+
+# 7. Compress test images
+compressed_images = encoder.predict(x_test)
+
+print("Original image size :", 28 * 28)                  # 784
+print("Compressed size     :", compressed_images.shape[1]) # 32
+print("Compressed data shape:", compressed_images.shape)
+
+
+══════════════════════════════════════════════════════════════════════
+SECTION 5: VARIATIONAL AUTOENCODER (VAE)
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q11. VAE — Generate Handwritten Digit Images
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras import layers, Model
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── 1. Load and Prepare MNIST ──────────────────────────────
+(x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
+
+x_train = x_train.astype("float32") / 255.
+x_test  = x_test.astype("float32")  / 255.
+
+x_train = x_train.reshape(-1, 784)
+x_test  = x_test.reshape(-1, 784)
+
+input_dim  = 784
+latent_dim = 16
+
+# ── 2. Encoder ─────────────────────────────────────────────
+encoder_inputs = layers.Input(shape=(input_dim,), name="Encoder_Input")
+
+x = layers.Dense(512, activation="relu")(encoder_inputs)
+x = layers.Dense(256, activation="relu")(x)
+x = layers.Dense(128, activation="relu")(x)
+
+z_mean    = layers.Dense(latent_dim, name="Latent_Mean")(x)
+z_log_var = layers.Dense(latent_dim, name="Latent_LogVar")(x)
+
+
+# ── 3. Reparameterization Trick ────────────────────────────
+def sampling(args):
+    z_mean, z_log_var = args
+    epsilon = tf.random.normal(shape=tf.shape(z_mean))
+    return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+
+
+z = layers.Lambda(sampling, name="Sampling")([z_mean, z_log_var])
+
+encoder = Model(encoder_inputs, [z_mean, z_log_var, z], name="Encoder")
+encoder.summary()
+
+
+# ── 4. Decoder ─────────────────────────────────────────────
+latent_inputs = layers.Input(shape=(latent_dim,), name="Decoder_Input")
+
+x = layers.Dense(128, activation="relu")(latent_inputs)
+x = layers.Dense(256, activation="relu")(x)
+x = layers.Dense(512, activation="relu")(x)
+
+decoder_outputs = layers.Dense(input_dim, activation="sigmoid")(x)
+
+decoder = Model(latent_inputs, decoder_outputs, name="Decoder")
+decoder.summary()
+
+
+# ── 5. VAE Model ───────────────────────────────────────────
+class VAE(Model):
+    def __init__(self, encoder, decoder):
+        super(VAE, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+
+    def call(self, inputs):
+        z_mean, z_log_var, z = self.encoder(inputs)
+        reconstructed = self.decoder(z)
+
+        # Reconstruction Loss
+        reconstruction_loss = tf.reduce_mean(
+            tf.keras.losses.binary_crossentropy(inputs, reconstructed)) * 784
+
+        # KL Divergence Loss
+        kl_loss = -0.5 * tf.reduce_mean(
+            tf.reduce_sum(
+                1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var),
+                axis=1
+            )
+        )
+
+        self.add_loss(reconstruction_loss + kl_loss)
+        return reconstructed
+
+
+vae = VAE(encoder, decoder)
+
+
+# ── 6. Compile ─────────────────────────────────────────────
+vae.compile(optimizer="adam")
+
+
+# ── 7. Train ───────────────────────────────────────────────
+vae.fit(
+    x_train, x_train,
+    epochs=30,
+    batch_size=64,
+    validation_data=(x_test, x_test)
+)
+
+
+# ── 8. Reconstruction Example ──────────────────────────────
+reconstructed = vae.predict(x_test[:10])
+
+plt.figure(figsize=(12, 4))
+for i in range(10):
+    plt.subplot(2, 10, i+1)
+    plt.imshow(x_test[i].reshape(28, 28), cmap="gray")
+    plt.axis("off")
+
+    plt.subplot(2, 10, i+11)
+    plt.imshow(reconstructed[i].reshape(28, 28), cmap="gray")
+    plt.axis("off")
+
+plt.show()
+
+
+══════════════════════════════════════════════════════════════════════
+SECTION 6: CONVOLUTIONAL NEURAL NETWORKS (CNN)
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+Q12. Basic CNN — MNIST Digit Classification (Accuracy vs Epochs)
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.datasets import mnist
+import matplotlib.pyplot as plt
+
+# 1. Load MNIST
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+# 2. Normalize and reshape for CNN (samples, height, width, channels)
+x_train = x_train.reshape(-1, 28, 28, 1) / 255.0
+x_test  = x_test.reshape(-1, 28, 28, 1)  / 255.0
+
+
+# 3. Create CNN model
+def create_cnn_model():
+    model = Sequential([
+        # First Convolution Layer
+        Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+        MaxPooling2D((2, 2)),
+
+        # Second Convolution Layer
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPooling2D((2, 2)),
+
+        # Fully Connected Layers
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.5),
+
+        # Output (10 digit classes)
+        Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    return model
+
+
+# 4. Train for different epoch counts
+epochs_list = [5, 10, 15, 20]
+accuracy_values = []
+
+for epochs in epochs_list:
+    print("\nTraining for", epochs, "epochs")
+
+    model = create_cnn_model()
+    model.fit(x_train, y_train, epochs=epochs, batch_size=64, verbose=0)
+
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+    accuracy_values.append(accuracy)
+
+    print("Test Accuracy:", accuracy)
+
+
+# 5. Display results
+print("\nEpoch vs Accuracy")
+for e, acc in zip(epochs_list, accuracy_values):
+    print("Epochs:", e, " Accuracy:", acc)
+
+
+# 6. Plot
+plt.plot(epochs_list, accuracy_values, marker='o')
+plt.xlabel("Number of Epochs")
+plt.ylabel("Test Accuracy")
+plt.title("CNN Accuracy vs Number of Epochs (MNIST)")
+plt.grid(True)
+plt.show()
+
+
+──────────────────────────────────────────────────────────────────────
+Q13. CNN with BatchNormalization — MNIST
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from tensorflow.keras.layers import Flatten, Dense, Dropout
+import matplotlib.pyplot as plt
+
+# 1. Load and Preprocess MNIST
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+x_test  = x_test.reshape(-1, 28, 28, 1).astype("float32")  / 255.0
+
+# 2. Build CNN Model with BatchNormalization
+model = Sequential([
+
+    # First Convolution Block
+    Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(28, 28, 1)),
+    BatchNormalization(),
+    MaxPooling2D(pool_size=(2, 2)),
+
+    # Second Convolution Block
+    Conv2D(64, (3, 3), activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling2D(pool_size=(2, 2)),
+
+    # Third Convolution Block
+    Conv2D(128, (3, 3), activation='relu', padding='same'),
+    BatchNormalization(),
+
+    # Fully Connected Layers
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(10, activation='softmax')
+])
+
+model.summary()
+
+# 3. Compile
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# 4. Train
+history = model.fit(
+    x_train, y_train,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.2,
+    verbose=1
+)
+
+# 5. Evaluate
+loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+print("\nTest Accuracy: {:.2f}%".format(accuracy * 100))
+
+# 6. Plot Accuracy
+plt.figure(figsize=(6, 4))
+plt.plot(history.history['accuracy'],     label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("MNIST CNN Accuracy (with BatchNorm)")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+──────────────────────────────────────────────────────────────────────
+Q14. CNN with Regularization (L1, L2, Dropout) — Fashion MNIST
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.regularizers import l1, l2
+
+# 1. Load Fashion MNIST
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
+
+# 2. Preprocess
+x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+x_test  = x_test.reshape(-1, 28, 28, 1).astype("float32")  / 255.0
+
+
+# 3. Function to create CNN model with different regularization
+def create_model(model_type):
+
+    regularizer = None
+    use_dropout = False
+
+    if model_type == "L1":
+        regularizer = l1(0.001)
+    elif model_type == "L2":
+        regularizer = l2(0.001)
+    elif model_type == "Dropout":
+        use_dropout = True
+    elif model_type == "L2+Dropout":
+        regularizer = l2(0.001)
+        use_dropout = True
+
+    model = Sequential()
+
+    # 4 Convolution Layers
+    model.add(Conv2D(32, (3, 3), activation='relu', padding='same',
+                     kernel_regularizer=regularizer, input_shape=(28, 28, 1)))
+    model.add(Conv2D(32, (3, 3), activation='relu', padding='same',
+                     kernel_regularizer=regularizer))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same',
+                     kernel_regularizer=regularizer))
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same',
+                     kernel_regularizer=regularizer))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu', kernel_regularizer=regularizer))
+
+    if use_dropout:
+        model.add(Dropout(0.5))
+
+    model.add(Dense(10, activation='softmax'))
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    return model
+
+
+# 4. Train and compare all model types
+models = ["Base", "L1", "L2", "Dropout", "L2+Dropout"]
+results = []
+
+for m in models:
+    print("\n===================================")
+    print("Training:", m)
+    print("===================================")
+
+    model = create_model(m)
+    history = model.fit(x_train, y_train, epochs=10, batch_size=64,
+                        validation_split=0.2, verbose=1)
+
+    train_acc = history.history["accuracy"][-1]
+    loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
+
+    results.append([m, train_acc * 100, test_acc * 100])
+
+
+# 5. Display Results
+print("\nFinal Results")
+print("---------------------------------------------------------")
+print("Architecture\t\tTraining Accuracy\tTest Accuracy")
+print("---------------------------------------------------------")
+for r in results:
+    print(f"{r[0]:15s}\t{r[1]:.2f}%\t\t{r[2]:.2f}%")
+
+
+──────────────────────────────────────────────────────────────────────
+Q15. CNN — MNIST vs Fashion MNIST Comparison (Accuracy vs Epochs)
+──────────────────────────────────────────────────────────────────────
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+import time
+import matplotlib.pyplot as plt
+
+
+# 1. Create CNN Model
+def create_model(input_shape):
+    model = Sequential([
+        Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=input_shape),
+        Conv2D(32, (3, 3), activation='relu', padding='same'),
+        MaxPooling2D((2, 2)),
+
+        Conv2D(64, (3, 3), activation='relu', padding='same'),
+        Conv2D(64, (3, 3), activation='relu', padding='same'),
+        MaxPooling2D((2, 2)),
+
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.5),
+        Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    return model
+
+
+# 2. Experiment function
+def run_experiment(dataset_name):
+
+    print("\n" + "="*60)
+    print("Dataset:", dataset_name)
+    print("="*60)
+
+    # Load dataset
+    if dataset_name == "MNIST":
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+    elif dataset_name == "Fashion MNIST":
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
+
+    # Preprocess
+    x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+    x_test  = x_test.reshape(-1, 28, 28, 1).astype("float32")  / 255.0
+
+    epochs_list = [5, 10, 20]
+    results = []
+
+    for epochs in epochs_list:
+
+        print(f"\nTraining for {epochs} epochs")
+
+        model = create_model((28, 28, 1))
+
+        start = time.time()
+        model.fit(x_train, y_train, epochs=epochs, batch_size=64,
+                  validation_split=0.2, verbose=1)
+        end   = time.time()
+
+        loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+        runtime = end - start
+
+        results.append([epochs, accuracy * 100, runtime])
+
+        print(f"Accuracy : {accuracy*100:.2f}%")
+        print(f"Time     : {runtime:.2f} seconds")
+
+    # Print result table
+    print("\nFinal Results")
+    print("---------------------------------------------")
+    print("Epochs\tAccuracy (%)\tTime (sec)")
+    print("---------------------------------------------")
+    for r in results:
+        print(f"{r[0]}\t{r[1]:.2f}\t\t{r[2]:.2f}")
+
+    # Plot
+    epoch_values = [r[0] for r in results]
+    accuracies   = [r[1] for r in results]
+
+    plt.figure(figsize=(6, 4))
+    plt.plot(epoch_values, accuracies, marker='o')
+    plt.title(f"{dataset_name} Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy (%)")
+    plt.grid(True)
+    plt.show()
+
+    return results
+
+
+# 3. Run experiments
+mnist_results   = run_experiment("MNIST")
+fashion_results = run_experiment("Fashion MNIST")
