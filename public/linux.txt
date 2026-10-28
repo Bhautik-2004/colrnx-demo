@@ -1,1321 +1,1659 @@
-# ==============================================================
-# TASK 1: N-GRAM MODELING
-# ==============================================================
-# Dataset:
-#   Artificial Intelligence improves healthcare.
-#   Artificial Intelligence is transforming education.
-#   Machine learning improves healthcare.
-#
-# Tasks:
-#   - Convert all text to lowercase.
-#   - Tokenize the text.
-#   - Generate: Unigrams, Bigrams, Trigrams
-#   - Display the frequency of each N-gram.
-#   - Calculate the Unigram probability for each word.
-#   - Calculate the Bigram probability.
-#   - Calculate the Trigram probability.
-#   - Identify the most frequent: Unigram, Bigram, Trigram
-# ==============================================================
-
-from collections import Counter
-
-# Dataset
-text = """
-Artificial Intelligence improves healthcare.
-Artificial Intelligence is transforming education.
-Machine learning improves healthcare.
-"""
-
-# -------------------------------
-# Step 1: Lowercase
-# -------------------------------
-text = text.lower()
-
-# -------------------------------
-# Step 2: Tokenization
-# -------------------------------
-tokens = text.replace(".", "").split()
-
-print("Tokens:")
-print(tokens)
-
-# -------------------------------
-# Step 3: Generate Unigrams
-# -------------------------------
-unigrams = tokens
-
-# Generate Bigrams
-bigrams = [(tokens[i], tokens[i+1]) for i in range(len(tokens)-1)]
-
-# Generate Trigrams
-trigrams = [(tokens[i], tokens[i+1], tokens[i+2]) for i in range(len(tokens)-2)]
-
-# -------------------------------
-# Step 4: Frequency
-# -------------------------------
-uni_freq = Counter(unigrams)
-bi_freq = Counter(bigrams)
-tri_freq = Counter(trigrams)
-
-print("\nUnigram Frequency")
-for k,v in uni_freq.items():
-    print(k,":",v)
-
-print("\nBigram Frequency")
-for k,v in bi_freq.items():
-    print(k,":",v)
-
-print("\nTrigram Frequency")
-for k,v in tri_freq.items():
-    print(k,":",v)
-
-# -------------------------------
-# Step 5: Unigram Probability
-# -------------------------------
-total_words = len(tokens)
-
-print("\nUnigram Probability")
-for word,count in uni_freq.items():
-    print(word,"=",count/total_words)
-
-# -------------------------------
-# Step 6: Bigram Probability
-# P(w2|w1)=Count(w1,w2)/Count(w1)
-# -------------------------------
-print("\nBigram Probability")
-
-for bg,count in bi_freq.items():
-    w1,w2 = bg
-    prob = count/uni_freq[w1]
-    print(bg,"=",prob)
-
-# -------------------------------
-# Step 7: Trigram Probability
-# P(w3|w1,w2)=Count(w1,w2,w3)/Count(w1,w2)
-# -------------------------------
-print("\nTrigram Probability")
-
-for tg,count in tri_freq.items():
-    bg = (tg[0],tg[1])
-    prob = count/bi_freq[bg]
-    print(tg,"=",prob)
-
-# -------------------------------
-# Step 8: Most Frequent
-# -------------------------------
-print("\nMost Frequent Unigram:")
-print(uni_freq.most_common(1))
-
-print("\nMost Frequent Bigram:")
-print(bi_freq.most_common(1))
-
-print("\nMost Frequent Trigram:")
-print(tri_freq.most_common(1))
-
-
-# ==============================================================
-# TASK 2: POS TAGGING AND NAMED ENTITY RECOGNITION (NER)
-# ==============================================================
-# Dataset:
-#   OpenAI developed ChatGPT in San Francisco.
-#   Dr. ABC teaches at GLS University, Ahmedabad.
-#   Google launched Gemini in 2024.
-#
-# Tasks:
-#   1. Load the English language model using spaCy.
-#   2. Tokenize the text.
-#   3. Perform POS Tagging — Print Token and POS Tag.
-#   4. Perform Named Entity Recognition — Print Entity and Label.
-#   5. Count: Total nouns, Total verbs, Total named entities.
-#   6. Identify all: PERSON, ORG, GPE, DATE
-# ==============================================================
-
-import spacy
-
-# Load English Model
-nlp = spacy.load("en_core_web_sm")
-
-text = """
-OpenAI developed ChatGPT in San Francisco.
-Dr. ABC teaches at GLS University, Ahmedabad.
-Google launched Gemini in 2024.
-"""
-
-doc = nlp(text)
-
-# --------------------------------
-# Tokenization
-# --------------------------------
-print("TOKENS")
-for token in doc:
-    print(token.text)
-
-# --------------------------------
-# POS Tagging
-# --------------------------------
-print("\nPOS TAGGING")
-noun_count = 0
-verb_count = 0
-
-for token in doc:
-    print(token.text, ":", token.pos_)
-
-    if token.pos_ == "NOUN" or token.pos_ == "PROPN":
-        noun_count += 1
-
-    if token.pos_ == "VERB":
-        verb_count += 1
-
-# --------------------------------
-# Named Entity Recognition
-# --------------------------------
-print("\nNAMED ENTITIES")
-
-entity_count = 0
-
-for ent in doc.ents:
-    print(ent.text, ":", ent.label_)
-    entity_count += 1
-
-print("\nTotal Nouns =", noun_count)
-print("Total Verbs =", verb_count)
-print("Total Named Entities =", entity_count)
-
-# --------------------------------
-# PERSON
-# --------------------------------
-print("\nPERSON")
-for ent in doc.ents:
-    if ent.label_ == "PERSON":
-        print(ent.text)
-
-# --------------------------------
-# ORG
-# --------------------------------
-print("\nORG")
-for ent in doc.ents:
-    if ent.label_ == "ORG":
-        print(ent.text)
-
-# --------------------------------
-# GPE
-# --------------------------------
-print("\nGPE")
-for ent in doc.ents:
-    if ent.label_ == "GPE":
-        print(ent.text)
-
-# --------------------------------
-# DATE
-# --------------------------------
-print("\nDATE")
-for ent in doc.ents:
-    if ent.label_ == "DATE":
-        print(ent.text)
-
-
-# ==============================================================
-# TASK 3: TEXT PREPROCESSING PIPELINE
-# ==============================================================
-# Dataset:
-#   "The movie Avengers: Endgame was AMAZING!!! 2025 version is coming soon."
-#
-# Tasks:
-#   a) Lowercase.
-#   b) Remove punctuation.
-#   c) Remove numbers.
-#   d) Tokenize (NLTK word_tokenize).
-#   e) Stop word removal (NLTK).
-# ==============================================================
-
-import nltk
-import string
-import re
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-
-# Download once
-nltk.download('punkt')
-nltk.download('punkt_tab')      # Required in newer NLTK versions
-nltk.download('stopwords')
-
-text = "The movie Avengers: Endgame was AMAZING!!! 2025 version is coming soon."
-
-print("Original Text:")
-print(text)
-
-# --------------------------------
-# a) Lowercase
-# --------------------------------
-text = text.lower()
-
-print("\nLowercase:")
-print(text)
-
-# --------------------------------
-# b) Remove punctuation
-# --------------------------------
-text = text.translate(str.maketrans('', '', string.punctuation))
-
-print("\nWithout Punctuation:")
-print(text)
-
-# --------------------------------
-# c) Remove numbers
-# --------------------------------
-text = re.sub(r'\d+', '', text)
-
-print("\nWithout Numbers:")
-print(text)
-
-# --------------------------------
-# d) Tokenization
-# --------------------------------
-tokens = word_tokenize(text)
-
-print("\nTokens:")
-print(tokens)
-
-# --------------------------------
-# e) Stopword Removal
-# --------------------------------
-stop_words = set(stopwords.words('english'))
-
-filtered = [word for word in tokens if word not in stop_words]
-
-print("\nAfter Stopword Removal:")
-print(filtered)
-
-
 ################################################################
-# FILE: NLP_Task-2.ipynb
+# FILE: DLL_Task-1.ipynb
 ################################################################
 
 
 # ==============================================================
-# TASK 1 — Q1: TEXT PREPROCESSING
+# TASK 1 — Q1: SINGLE NEURON WITH SIGMOID ACTIVATION
 # ==============================================================
-# Sentence: "Plato's ideas were influential!!! Philosophy shapes human thought in 2025."
-#
-# Tasks:
-#   a) Lowercase.
-#   b) Remove punctuation.
-#   c) Remove numbers.
-#   d) Tokenize (NLTK word_tokenize).
-#   e) Stop word removal (NLTK).
-# ==============================================================
-
-import re
-import string
-import nltk
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-
-# Download (run once)
-# nltk.download('punkt')
-# nltk.download('stopwords')
-
-text = "Plato's ideas were influential!!! Philosophy shapes human thought in 2025."
-
-# a) Lowercase
-lower = text.lower()
-print("Lowercase:\n", lower)
-
-# b) Remove punctuation
-no_punct = lower.translate(str.maketrans('', '', string.punctuation + "'"))
-print("\nRemove Punctuation:\n", no_punct)
-
-# c) Remove numbers
-no_numbers = re.sub(r'\d+', '', no_punct)
-print("\nRemove Numbers:\n", no_numbers)
-
-# d) Tokenize
-tokens = word_tokenize(no_numbers)
-print("\nTokens:\n", tokens)
-
-# e) Stopword Removal
-stop_words = set(stopwords.words('english'))
-filtered = [word for word in tokens if word not in stop_words]
-print("\nAfter Stopword Removal:\n", filtered)
-
-
-# ==============================================================
-# TASK 1 — Q2: STEMMING AND LEMMATIZATION
-# ==============================================================
-# Sentence: "Thinkers were questioning reality more deeply than ever."
-#
-# Tasks:
-#   a) Apply Porter Stemmer.
-#   b) Apply Snowball Stemmer.
-#   c) Apply spaCy Lemmatization.
-#   d) Compare all three outputs.
-# ==============================================================
-
-import spacy
-from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer, SnowballStemmer
-
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
-
-text = "Thinkers were questioning reality more deeply than ever."
-
-tokens = word_tokenize(text)
-
-# a) Porter Stemmer
-porter = PorterStemmer()
-porter_output = [porter.stem(word) for word in tokens]
-
-print("Porter Stemmer:")
-print(porter_output)
-
-# b) Snowball Stemmer
-snowball = SnowballStemmer("english")
-snowball_output = [snowball.stem(word) for word in tokens]
-
-print("\nSnowball Stemmer:")
-print(snowball_output)
-
-# c) spaCy Lemmatization
-doc = nlp(text)
-lemma_output = [token.lemma_ for token in doc]
-
-print("\nspaCy Lemmatization:")
-print(lemma_output)
-
-print("\nComparison")
-print("Porter   :", porter_output)
-print("Snowball :", snowball_output)
-print("Lemma    :", lemma_output)
-
-
-# ==============================================================
-# TASK 1 — Q3: FULL NLP PIPELINE
-# ==============================================================
-# Sentence: "Plato's ideas are deep !!!Visit http://philosophy.com.
-#            Philosophers discuss morality."
-#
-# Tasks:
-#   a) Preprocessing pipeline:
-#      - Lowercase, Remove HTML tags, Remove URLs,
-#      - Remove punctuation, Tokenize, Remove stopwords,
-#      - Stemming (Porter), Lemmatization (spaCy)
-#   b) Bag of Words (BoW) and TF-IDF vectorization.
-#   c) POS Tagging and Named Entity Recognition.
-# ==============================================================
-
-import re
-import string
-import spacy
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
-
-text = """Plato's ideas are deep !!!Visit http://philosophy.com.<div>Philosophers
-discuss morality</div> ."""
-
-# a) Preprocessing Pipeline
-# Lowercase
-processed = text.lower()
-
-# Remove HTML tags
-processed = re.sub(r'<.*?>', '', processed)
-
-# Remove URLs
-processed = re.sub(r'http\S+|www\S+', '', processed)
-
-# Remove punctuation
-processed = processed.translate(str.maketrans('', '', string.punctuation + "'"))
-
-# Tokenize
-tokens = word_tokenize(processed)
-
-# Stopword removal
-stop_words = set(stopwords.words('english'))
-tokens = [word for word in tokens if word not in stop_words]
-
-# Stemming
-stemmer = PorterStemmer()
-stemmed = [stemmer.stem(word) for word in tokens]
-
-# Lemmatization
-doc = nlp(" ".join(tokens))
-lemmatized = [token.lemma_ for token in doc]
-
-print("Tokens:", tokens)
-print("Stemmed:", stemmed)
-print("Lemmatized:", lemmatized)
-
-# b) Bag of Words
-corpus = [" ".join(lemmatized)]
-
-cv = CountVectorizer()
-bow = cv.fit_transform(corpus)
-
-print("\nBoW Vocabulary:")
-print(cv.get_feature_names_out())
-
-print("BoW Matrix:")
-print(bow.toarray())
-
-# TF-IDF
-tfidf = TfidfVectorizer()
-tfidf_matrix = tfidf.fit_transform(corpus)
-
-print("\nTF-IDF Vocabulary:")
-print(tfidf.get_feature_names_out())
-
-print("TF-IDF Matrix:")
-print(tfidf_matrix.toarray())
-
-# c) POS Tagging
-doc = nlp(text)
-
-print("\nPOS Tagging")
-for token in doc:
-    print(token.text, "->", token.pos_)
-
-# Named Entity Recognition
-print("\nNamed Entities")
-if doc.ents:
-    for ent in doc.ents:
-        print(ent.text, "->", ent.label_)
-else:
-    print("No Named Entities Found.")
-
-
-# ==============================================================
-# TASK 2 — Q1: TEXT PREPROCESSING
-# ==============================================================
-# Sentence: "This medicine caused side effects!!! 100 patients reported issues."
-#
-# Tasks:
-#   a) Lowercase.
-#   b) Remove punctuation.
-#   c) Remove numbers.
-#   d) Tokenize (NLTK word_tokenize).
-#   e) Stop word removal (NLTK).
-# ==============================================================
-
-import re
-import string
-import nltk
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-
-# Download (Run only once)
-# nltk.download('punkt')
-# nltk.download('stopwords')
-
-text = "This medicine caused side effects!!! 100 patients reported issues."
-
-# a) Lowercase
-lower = text.lower()
-print("Lowercase:\n", lower)
-
-# b) Remove punctuation
-no_punct = lower.translate(str.maketrans('', '', string.punctuation))
-print("\nRemove Punctuation:\n", no_punct)
-
-# c) Remove numbers
-no_numbers = re.sub(r'\d+', '', no_punct)
-print("\nRemove Numbers:\n", no_numbers)
-
-# d) Tokenization
-tokens = word_tokenize(no_numbers)
-print("\nTokens:\n", tokens)
-
-# e) Stopword Removal
-stop_words = set(stopwords.words('english'))
-filtered = [word for word in tokens if word not in stop_words]
-
-print("\nAfter Stopword Removal:\n", filtered)
-
-
-# ==============================================================
-# TASK 2 — Q2: STEMMING AND LEMMATIZATION
-# ==============================================================
-# Sentence: "Doctors were analyzing symptoms more carefully than usual."
-#
-# Tasks:
-#   a) Apply Porter Stemmer.
-#   b) Apply Snowball Stemmer.
-#   c) Apply spaCy Lemmatization.
-#   d) Compare all three outputs.
-# ==============================================================
-
-import spacy
-from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer, SnowballStemmer
-
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
-
-text = "Doctors were analyzing symptoms more carefully than usual."
-
-tokens = word_tokenize(text)
-
-# a) Porter Stemmer
-porter = PorterStemmer()
-porter_output = [porter.stem(word) for word in tokens]
-
-print("Porter Stemmer:")
-print(porter_output)
-
-# b) Snowball Stemmer
-snowball = SnowballStemmer("english")
-snowball_output = [snowball.stem(word) for word in tokens]
-
-print("\nSnowball Stemmer:")
-print(snowball_output)
-
-# c) spaCy Lemmatization
-doc = nlp(text)
-lemma_output = [token.lemma_ for token in doc]
-
-print("\nspaCy Lemmatization:")
-print(lemma_output)
-
-print("\nComparison")
-print("Porter   :", porter_output)
-print("Snowball :", snowball_output)
-print("Lemma    :", lemma_output)
-
-
-# ==============================================================
-# TASK 2 — Q3: FULL NLP PIPELINE
-# ==============================================================
-# Sentence: "This drug caused side effects!!! Visit http://med.com.
-#            Doctors warned about overdose."
-#
-# Tasks:
-#   a) Preprocessing pipeline:
-#      - Lowercase, Remove HTML tags, Remove URLs,
-#      - Remove punctuation, Tokenize, Remove stopwords,
-#      - Stemming (Porter), Lemmatization (spaCy)
-#   b) Bag of Words (BoW) and TF-IDF vectorization.
-#   c) POS Tagging and Named Entity Recognition.
-# ==============================================================
-
-import re
-import string
-import spacy
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
-
-text = """This drug caused side effects!!! Visit http://med.com.Doctors warned about
-overdose</div>."""
-
-# a) Preprocessing Pipeline
-# Lowercase
-processed = text.lower()
-
-# Remove HTML tags
-processed = re.sub(r'<.*?>', '', processed)
-
-# Remove URLs
-processed = re.sub(r'http\S+|www\S+', '', processed)
-
-# Remove punctuation
-processed = processed.translate(str.maketrans('', '', string.punctuation))
-
-# Tokenize
-tokens = word_tokenize(processed)
-
-# Stopword Removal
-stop_words = set(stopwords.words('english'))
-tokens = [word for word in tokens if word not in stop_words]
-
-# Stemming
-stemmer = PorterStemmer()
-stemmed = [stemmer.stem(word) for word in tokens]
-
-# Lemmatization
-doc = nlp(" ".join(tokens))
-lemmatized = [token.lemma_ for token in doc]
-
-print("Tokens:", tokens)
-print("Stemmed:", stemmed)
-print("Lemmatized:", lemmatized)
-
-# b) Bag of Words (BoW)
-corpus = [" ".join(lemmatized)]
-
-cv = CountVectorizer()
-bow = cv.fit_transform(corpus)
-
-print("\nBoW Vocabulary:")
-print(cv.get_feature_names_out())
-
-print("BoW Matrix:")
-print(bow.toarray())
-
-# TF-IDF
-tfidf = TfidfVectorizer()
-tfidf_matrix = tfidf.fit_transform(corpus)
-
-print("\nTF-IDF Vocabulary:")
-print(tfidf.get_feature_names_out())
-
-print("TF-IDF Matrix:")
-print(tfidf_matrix.toarray())
-
-# c) POS Tagging
-doc = nlp(text)
-
-print("\nPOS Tagging")
-for token in doc:
-    print(token.text, "->", token.pos_)
-
-# Named Entity Recognition (NER)
-print("\nNamed Entities")
-if doc.ents:
-    for ent in doc.ents:
-        print(ent.text, "->", ent.label_)
-else:
-    print("No Named Entities Found.")
-
-
-################################################################
-# FILE: NLP_Task-3.ipynb
-################################################################
-
-
-# ==============================================================
-# TASK 3 — CODE 1: SENTIMENT ANALYSIS USING TEXTBLOB
-# ==============================================================
-# Dataset: 5 tweets
-#   - I love this phone.
-#   - This movie is boring.
-#   - The service is okay.
-#   - Amazing experience!
-#   - Worst app ever.
+# Inputs: [2, 3] | Weights: [0.5, -0.4] | Bias: 0.2
 #
 # Task:
-#   - Use TextBlob to compute polarity.
-#   - Classify each tweet as Positive, Negative, or Neutral.
+#   - Compute weighted sum z = sum(x*w) + b.
+#   - Apply sigmoid activation and print neuron output.
 # ==============================================================
 
-from textblob import TextBlob
+import math
 
-# Dataset
-tweets = [
-    "I love this phone.",
-    "This movie is boring.",
-    "The service is okay.",
-    "Amazing experience!",
-    "Worst app ever."
-]
+def sigmoid(x):
+    return 1 / (1 + math.exp(-x))
 
-# Sentiment Analysis
-for tweet in tweets:
+def single_neuron(inputs, weights, bias):
+    z = 0
+    for i in range(len(inputs)):
+        z += inputs[i] * weights[i]
+    z += bias
+    return sigmoid(z)
 
-    blob = TextBlob(tweet)
-    polarity = blob.sentiment.polarity
+inputs = [2, 3]
+weights = [0.5, -0.4]
+bias = 0.2
 
-    if polarity > 0:
-        sentiment = "Positive"
-    elif polarity < 0:
-        sentiment = "Negative"
-    else:
-        sentiment = "Neutral"
-
-    print("Tweet      :", tweet)
-    print("Polarity   :", polarity)
-    print("Sentiment  :", sentiment)
-    print("-" * 50)
+result = single_neuron(inputs, weights, bias)
+print("Neuron Output:", result)
 
 
 # ==============================================================
-# TASK 3 — CODE 2: SENTIMENT ANALYSIS USING VADER
+# TASK 1 — Q2: PERCEPTRON FOR AND / OR LOGIC GATES
 # ==============================================================
-# Dataset: 5 tweets
-#   - Excellent service.
-#   - The exam was horrible.
-#   - The weather is okay.
-#   - I absolutely love ChatGPT!
-#   - Very disappointing experience.
+# Task:
+#   - Implement perceptron with step activation.
+#   - Use weights/bias to realise AND gate and OR gate.
+#   - Print output for all 4 input combinations.
+# ==============================================================
+
+import numpy as np
+
+def perceptron(x, w, b):
+    return 1 if np.dot(x, w) + b >= 0 else 0
+
+AND_weights = np.array([1, 1])
+AND_bias = -1.5
+
+OR_weights = np.array([1, 1])
+OR_bias = -0.5
+
+inputs = [[0, 0], [0, 1], [1, 0], [1, 1]]
+
+print("AND Gate")
+for x in inputs:
+    print(x, perceptron(x, AND_weights, AND_bias))
+
+print("\nOR Gate")
+for x in inputs:
+    print(x, perceptron(x, OR_weights, OR_bias))
+
+
+# ==============================================================
+# TASK 1 — Q3: PERCEPTRON CLASSIFIER ON BREAST CANCER DATASET
+# ==============================================================
+# Dataset: sklearn load_breast_cancer
 #
 # Task:
-#   - Use VADER SentimentIntensityAnalyzer.
-#   - Print Negative, Neutral, Positive, and Compound scores.
-#   - Classify as Positive (compound >= 0.05),
-#     Negative (compound <= -0.05), or Neutral.
+#   - Split data (80% train, 20% test).
+#   - Scale features using StandardScaler.
+#   - Train sklearn Perceptron.
+#   - Print accuracy and classification report.
 # ==============================================================
 
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-# Dataset
-tweets = [
-    "Excellent service.",
-    "The exam was horrible.",
-    "The weather is okay.",
-    "I absolutely love ChatGPT!",
-    "Very disappointing experience."
-]
-
-analyzer = SentimentIntensityAnalyzer()
-
-for tweet in tweets:
-
-    score = analyzer.polarity_scores(tweet)
-
-    if score["compound"] >= 0.05:
-        sentiment = "Positive"
-    elif score["compound"] <= -0.05:
-        sentiment = "Negative"
-    else:
-        sentiment = "Neutral"
-
-    print("Tweet           :", tweet)
-    print("Negative score  :", score["neg"])
-    print("Neutral score   :", score["neu"])
-    print("Positive score  :", score["pos"])
-    print("Compound score  :", score["compound"])
-    print("Sentiment       :", sentiment)
-    print("-" * 60)
-
-
-# ==============================================================
-# TASK 3 — CODE 3: NAIVE BAYES SENTIMENT CLASSIFIER (PREDICT)
-# ==============================================================
-# Dataset: 6 labeled product reviews (Positive / Negative)
-#
-# Task:
-#   1. Create a DataFrame.
-#   2. Apply TF-IDF vectorization.
-#   3. Train a Multinomial Naive Bayes model.
-#   4. Predict sentiment of a new sentence: "Excellent battery"
-# ==============================================================
-
-import pandas as pd
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-
-# Dataset
-data = {
-    'text': [
-        'Good phone',
-        'Excellent camera',
-        'Bad battery',
-        'Worst service',
-        'Amazing performance',
-        'Poor quality'
-    ],
-    'label': [
-        'Positive',
-        'Positive',
-        'Negative',
-        'Negative',
-        'Positive',
-        'Negative'
-    ]
-}
-
-# Step 1: Create DataFrame
-df = pd.DataFrame(data)
-
-print("Dataset:")
-print(df)
-
-# Step 2: TF-IDF Vectorization
-vectorizer = TfidfVectorizer()
-
-X = vectorizer.fit_transform(df['text'])
-y = df['label']
-
-# Step 3: Train Multinomial Naive Bayes
-model = MultinomialNB()
-
-model.fit(X, y)
-
-# Step 4: Predict new sentence
-new_text = ["Excellent battery"]
-
-new_vector = vectorizer.transform(new_text)
-
-prediction = model.predict(new_vector)
-
-# Step 5: Print predicted sentiment
-print("\nText :", new_text[0])
-print("Predicted Sentiment :", prediction[0])
-
-
-# ==============================================================
-# TASK 3 — CODE 4: NAIVE BAYES WITH TRAIN-TEST SPLIT & ACCURACY
-# ==============================================================
-# Dataset: 6 labeled product reviews (Positive / Negative)
-#
-# Task:
-#   1. Split dataset (70% train, 30% test).
-#   2. Apply TF-IDF vectorization.
-#   3. Train MultinomialNB on training data.
-#   4. Predict on test data.
-#   5. Print actual vs predicted labels.
-#   6. Print accuracy score.
-# ==============================================================
-
-import pandas as pd
-
+from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Perceptron
+from sklearn.metrics import accuracy_score, classification_report
 
-# Dataset
-data = {
-    'text': [
-        'Good product',
-        'Excellent quality',
-        'Poor battery',
-        'Worst experience',
-        'Amazing phone',
-        'Bad service'
-    ],
-    'label': [
-        'Positive',
-        'Positive',
-        'Negative',
-        'Negative',
-        'Positive',
-        'Negative'
-    ]
-}
+data = load_breast_cancer()
 
-# Create DataFrame
-df = pd.DataFrame(data)
-
-# Step 1: Split dataset
 X_train, X_test, y_train, y_test = train_test_split(
-    df['text'],
-    df['label'],
-    test_size=0.3,
-    random_state=42
+    data.data, data.target, test_size=0.2, random_state=42
 )
 
-# Step 2: Apply TF-IDF
-vectorizer = TfidfVectorizer()
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-X_train = vectorizer.fit_transform(X_train)
-X_test = vectorizer.transform(X_test)
-
-# Step 3: Train MultinomialNB
-model = MultinomialNB()
-
+model = Perceptron(max_iter=1000)
 model.fit(X_train, y_train)
 
-# Step 4: Predict test data
-prediction = model.predict(X_test)
+pred = model.predict(X_test)
 
-# Step 5: Print actual and predicted labels
-print("Actual labels:")
-print(y_test.values)
-
-print("\nPredicted labels:")
-print(prediction)
-
-# Step 6: Accuracy
-accuracy = accuracy_score(y_test, prediction)
-
-print("\nAccuracy :", accuracy)
+print("Accuracy:", accuracy_score(y_test, pred))
+print("\nClassification Report:\n", classification_report(y_test, pred))
 
 
 # ==============================================================
-# TASK 3 — CODE 5: PRODUCT REVIEW SENTIMENT WITH COUNTS (TEXTBLOB)
+# TASK 1 — Q4: MULTI-LAYER PERCEPTRON FOR XOR PROBLEM
 # ==============================================================
-# Dataset: 6 product reviews
+# Task:
+#   - Build Keras MLP (2 -> 4 ReLU -> 1 Sigmoid).
+#   - Train on XOR truth table.
+#   - Print predicted XOR output.
+# ==============================================================
+
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([0, 1, 1, 0])
+
+model = Sequential([
+    Input(shape=(2,)),
+    Dense(4, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(X, y, epochs=500, verbose=0)
+
+print("XOR System Output:")
+print((model.predict(X) > 0.5).astype(int))
+
+
+# ==============================================================
+# TASK 1 — Q5: HYPERPARAMETER TUNING OF MLP USING GRIDSEARCHCV
+# ==============================================================
+# Dataset: sklearn load_iris
 #
 # Task:
-#   - Use TextBlob to analyze sentiment of each review.
-#   - Print polarity and sentiment for each review.
-#   - Count and print total Positive, Negative, and Neutral reviews.
+#   - Tune hidden_layer_sizes, activation, learning_rate_init.
+#   - Use GridSearchCV with MLPClassifier.
+#   - Print best parameters and best CV score.
 # ==============================================================
 
-from textblob import TextBlob
+from sklearn.datasets import load_iris
+from sklearn.model_selection import GridSearchCV
+from sklearn.neural_network import MLPClassifier
 
-# Dataset
-reviews = [
-    "The camera quality is excellent.",
-    "Battery backup is poor.",
-    "Display is fantastic.",
-    "The phone hangs frequently.",
-    "Worth every penny.",
-    "Waste of money."
-]
+data = load_iris()
 
-positive_count = 0
-negative_count = 0
-neutral_count = 0
+parameters = {
+    'hidden_layer_sizes': [(50,), (100,)],
+    'activation': ['relu', 'tanh'],
+    'learning_rate_init': [0.001, 0.01]
+}
 
-# Sentiment Analysis
-for review in reviews:
+model = MLPClassifier(max_iter=500, random_state=42)
+grid = GridSearchCV(model, parameters)
+grid.fit(data.data, data.target)
 
-    blob = TextBlob(review)
-
-    polarity = blob.sentiment.polarity
-
-    if polarity > 0:
-        sentiment = "Positive"
-        positive_count += 1
-
-    elif polarity < 0:
-        sentiment = "Negative"
-        negative_count += 1
-
-    else:
-        sentiment = "Neutral"
-        neutral_count += 1
-
-    print("Review    :", review)
-    print("Polarity  :", polarity)
-    print("Sentiment :", sentiment)
-    print("-" * 60)
-
-# Counts
-print("\nTotal Positive reviews :", positive_count)
-print("Total Negative reviews :", negative_count)
-print("Total Neutral reviews  :", neutral_count)
+print("Best Parameters found:", grid.best_params_)
+print("Best Cross-Validation Score:", grid.best_score_)
 
 
 # ==============================================================
-# TASK 3 — CODE 6: TEXTBLOB vs VADER COMPARISON
+# TASK 1 — Q6: DEEP MLP FOR MNIST DIGIT CLASSIFICATION
 # ==============================================================
-# Dataset: 5 tweets
-#   - Amazing product
-#   - Worst customer support
-#   - Very good quality
-#   - Terrible experience
-#   - The delivery was okay.
+# Dataset: MNIST
 #
 # Task:
-#   - Analyze each tweet using both TextBlob and VADER.
-#   - Print sentiment and score from both methods side by side.
+#   - Flatten and normalise images.
+#   - Build MLP (784 -> 128 -> 64 -> 10).
+#   - Train and predict labels for 5 test images.
+#   - Display images with actual vs predicted label.
 # ==============================================================
 
-from textblob import TextBlob
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.datasets import mnist
 
-# Dataset
-tweets = [
-    "Amazing product",
-    "Worst customer support",
-    "Very good quality",
-    "Terrible experience",
-    "The delivery was okay."
-]
+# 1. Load and process MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_train_flat = X_train.reshape(-1, 784) / 255.0
+X_test_flat = X_test.reshape(-1, 784) / 255.0
 
-analyzer = SentimentIntensityAnalyzer()
+# 2. Build deep MLP network sequence
+mnist_model = Sequential([
+    Input(shape=(784,)),
+    Dense(128, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(10, activation='softmax')
+])
 
-for tweet in tweets:
+mnist_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+mnist_model.fit(X_train_flat, y_train, epochs=3, batch_size=64, verbose=1)
 
-    # -------------------------
-    # TextBlob
-    # -------------------------
-    blob = TextBlob(tweet)
+# 3. Predict classification labels
+predictions = mnist_model.predict(X_test_flat[:5])
+predicted_labels = predictions.argmax(axis=1)
 
-    polarity = blob.sentiment.polarity
+# 4. Display original test image samples alongside network output
+plt.figure(figsize=(10, 2))
+for i in range(5):
+    plt.subplot(1, 5, i + 1)
+    plt.imshow(X_test[i], cmap='gray')
+    plt.title(f"Act: {y_test[i]} | Pred: {predicted_labels[i]}", fontsize=9)
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
 
-    if polarity > 0:
-        textblob_sentiment = "Positive"
-    elif polarity < 0:
-        textblob_sentiment = "Negative"
-    else:
-        textblob_sentiment = "Neutral"
 
-    # -------------------------
-    # VADER
-    # -------------------------
-    score = analyzer.polarity_scores(tweet)
+# ==============================================================
+# TASK 1 — Q7: OPTIMIZER COMPARISON — SGD vs ADAM
+# ==============================================================
+# Dataset: MNIST
+#
+# Task:
+#   - Build same network (784 -> 256 -> 128 -> 10).
+#   - Train once with SGD and once with Adam.
+#   - Compare accuracy / loss.
+# ==============================================================
 
-    if score["compound"] >= 0.05:
-        vader_sentiment = "Positive"
-    elif score["compound"] <= -0.05:
-        vader_sentiment = "Negative"
-    else:
-        vader_sentiment = "Neutral"
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.datasets import mnist
 
-    # -------------------------
-    # Print comparison
-    # -------------------------
-    print("=" * 60)
-    print("Tweet :", tweet)
+(X_train, y_train), (_, _) = mnist.load_data()
+X_train_flat = X_train.reshape(-1, 784) / 255.0
 
-    print(
-        "TextBlob :",
-        textblob_sentiment,
-        "| Polarity =",
-        polarity
-    )
+def build_network():
+    return Sequential([
+        Input(shape=(784,)),
+        Dense(256, activation='relu'),
+        Dense(128, activation='relu'),
+        Dense(10, activation='softmax')
+    ])
 
-    print(
-        "VADER    :",
-        vader_sentiment,
-        "| Compound =",
-        score["compound"]
-    )
+# Stochastic Gradient Descent Evaluation
+model_sgd = build_network()
+model_sgd.compile(loss='sparse_categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+print("Evaluating Network with SGD Optimizer...")
+history_sgd = model_sgd.fit(X_train_flat, y_train, epochs=2, batch_size=128, verbose=1)
+
+# Adam Optimizer Evaluation
+model_adam = build_network()
+model_adam.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+print("\nEvaluating Network with Adam Optimizer...")
+history_adam = model_adam.fit(X_train_flat, y_train, epochs=2, batch_size=128, verbose=1)
+
+
+# ==============================================================
+# TASK 1 — Q8: DENOISING AUTOENCODER
+# ==============================================================
+# Dataset: MNIST
+#
+# Task:
+#   - Add Gaussian noise to images.
+#   - Build autoencoder (784 -> 64 -> 784).
+#   - Train with noisy input -> clean target.
+#   - Plot noisy input vs denoised output.
+# ==============================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.datasets import mnist
+
+# 1. Prepare raw standard data and construct synthetic noisy image matrix
+(X_train, _), (X_test, _) = mnist.load_data()
+X_train_flat = X_train.reshape(-1, 784) / 255.0
+X_test_flat = X_test.reshape(-1, 784) / 255.0
+
+noise_factor = 0.4
+X_train_noisy = np.clip(X_train_flat + noise_factor * np.random.normal(0, 1, X_train_flat.shape), 0.0, 1.0)
+X_test_noisy = np.clip(X_test_flat + noise_factor * np.random.normal(0, 1, X_test_flat.shape), 0.0, 1.0)
+
+# 2. Build Denoising Network pipeline
+input_img = Input(shape=(784,))
+encoded = Dense(64, activation='relu')(input_img)
+decoded = Dense(784, activation='sigmoid')(encoded)
+
+denoiser = Model(input_img, decoded)
+denoiser.compile(optimizer='adam', loss='mse')
+denoiser.fit(X_train_noisy, X_train_flat, epochs=5, batch_size=128, shuffle=True, verbose=1)
+
+# 3. Clean test images 
+denoised_images = denoiser.predict(X_test_noisy[:5]).reshape(-1, 28, 28)
+
+# 4. Plot Noisy Input vs Clean Refined Output Visualizations
+plt.figure(figsize=(10, 4))
+for i in range(5):
+    # Noisy row
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(X_test_noisy[i].reshape(28, 28), cmap='gray')
+    plt.title("Noisy Input")
+    plt.axis('off')
+    
+    # Restored row
+    plt.subplot(2, 5, i + 6)
+    plt.imshow(denoised_images[i], cmap='gray')
+    plt.title("Denoised Output")
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+
+# ==============================================================
+# TASK 1 — Q9: AUTOENCODER FOR DIMENSIONALITY REDUCTION
+# ==============================================================
+# Dataset: MNIST
+#
+# Task:
+#   - Build autoencoder with 2-neuron bottleneck (784 -> 2 -> 784).
+#   - Extract latent features using encoder sub-model.
+#   - Print reduced shape and extracted features.
+# ==============================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.datasets import mnist
+
+(X_train, _), (X_test, _) = mnist.load_data()
+X_train_flat = X_train.reshape(-1, 784) / 255.0
+X_test_flat = X_test.reshape(-1, 784) / 255.0
+
+# 1. Structure Bottleneck Encoder Architecture
+input_img = Input(shape=(784,))
+latent_space = Dense(2, activation='relu', name='low_dim_latent')(input_img) # Compressed to 2 Features
+decoded = Dense(784, activation='sigmoid')(latent_space)
+
+autoencoder = Model(input_img, decoded)
+autoencoder.compile(optimizer='adam', loss='mse')
+autoencoder.fit(X_train_flat, X_train_flat, epochs=3, batch_size=128, verbose=1)
+
+# 2. Extract latent feature spaces using independent mapping submodel
+encoder_model = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('low_dim_latent').output)
+extracted_features = encoder_model.predict(X_test_flat[:5])
+
+print("\nOriginal Image Matrix Dimension shape: (5, 784)")
+print("Reduced Latent Dimension shape:", extracted_features.shape)
+print("\nExtracted Coordinates Mapping for First 5 Sample Images:\n", extracted_features)
+
+
+# ==============================================================
+# TASK 1 — Q10: AUTOENCODER FOR IMAGE COMPRESSION
+# ==============================================================
+# Dataset: MNIST
+#
+# Task:
+#   - Compress images 784 -> 32 -> 784.
+#   - Reconstruct test images.
+#   - Plot actual vs reconstructed images.
+# ==============================================================
+
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.datasets import mnist
+
+(X_train, _), (X_test, _) = mnist.load_data()
+X_train_flat = X_train.reshape(-1, 784) / 255.0
+X_test_flat = X_test.reshape(-1, 784) / 255.0
+
+# Compression target factor: 32 dimensions down from 784 original variables
+input_img = Input(shape=(784,))
+compressed_layer = Dense(32, activation='relu')(input_img)
+decompressed_layer = Dense(784, activation='sigmoid')(compressed_layer)
+
+compression_ae = Model(input_img, decompressed_layer)
+compression_ae.compile(optimizer='adam', loss='binary_crossentropy')
+compression_ae.fit(X_train_flat, X_train_flat, epochs=4, batch_size=128, verbose=1)
+
+# Reconstruct data
+reconstructed_images = compression_ae.predict(X_test_flat[:5]).reshape(-1, 28, 28)
+
+# Contrast original input images with compressed/restored predictions
+plt.figure(figsize=(10, 4))
+for i in range(5):
+    # Actual Inputs
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(X_test[i], cmap='gray')
+    plt.title("Actual Image")
+    plt.axis('off')
+    
+    # Predicted Out
+    plt.subplot(2, 5, i + 6)
+    plt.imshow(reconstructed_images[i], cmap='gray')
+    plt.title("Predicted Out")
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+
+# ==============================================================
+# TASK 1 — Q11: VARIATIONAL AUTOENCODER (VAE) FOR DIGIT GENERATION
+# ==============================================================
+# Dataset: MNIST
+#
+# Task:
+#   - Build encoder (z_mean, z_log_var) with reparameterization sampling.
+#   - Build decoder and custom VAE train_step (Reconstruction + KL loss).
+#   - Generate new digits from a 5x5 latent space grid.
+# ==============================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense, Lambda
+from tensorflow.keras.datasets import mnist
+import keras
+
+print("--- Task 11: Variational Autoencoder (VAE) for Digit Generation ---")
+
+# 1. Load and process data
+(X_train, _), (_, _) = mnist.load_data()
+X_images = X_train.reshape(-1, 784) / 255.0
+
+latent_dim = 2
+
+# 2. Stochastic sampling function structure
+def sampling(args):
+    z_mean, z_log_var = args
+    batch = tf.shape(z_mean)[0]
+    dim = tf.shape(z_mean)[1]
+    epsilon = tf.random.normal(shape=(batch, dim))
+    return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+
+# 3. Build Encoder
+vae_input = Input(shape=(784,), name="encoder_input")
+h = Dense(128, activation='relu')(vae_input)
+z_mean = Dense(latent_dim, name="z_mean")(h)
+z_log_var = Dense(latent_dim, name="z_log_var")(h)
+z = Lambda(sampling, name="z")([z_mean, z_log_var])
+encoder = Model(vae_input, [z_mean, z_log_var, z], name="encoder")
+
+# 4. Build Decoder
+latent_inputs = Input(shape=(latent_dim,), name="z_sampling")
+h_decoded = Dense(128, activation='relu')(latent_inputs)
+decoder_output = Dense(784, activation='sigmoid')(h_decoded)
+decoder = Model(latent_inputs, decoder_output, name="decoder")
+
+# 5. Build Keras 3 Compliant Custom Model Overriding train_step
+class VAE(Model):
+    def __init__(self, encoder, decoder, **kwargs):
+        super().__init__(**kwargs)
+        self.encoder = encoder
+        self.decoder = decoder
+        # Track metric averages smoothly over epochs
+        self.total_loss_tracker = keras.metrics.Mean(name="total_loss")
+        self.reconstruction_loss_tracker = keras.metrics.Mean(name="reconstruction_loss")
+        self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
+
+    @property
+    def metrics(self):
+        return [self.total_loss_tracker, self.reconstruction_loss_tracker, self.kl_loss_tracker]
+
+    def train_step(self, data):
+        with tf.GradientTape() as tape:
+            # Forward pass through encoder and decoder
+            z_mean, z_log_var, z = self.encoder(data)
+            reconstruction = self.decoder(z)
+            
+            # Use keras.losses inside your model context to remain framework safe
+            recon_loss = tf.reduce_mean(
+                tf.reduce_sum(keras.losses.binary_crossentropy(data, reconstruction), axis=-1)
+            )
+            kl_loss = -0.5 * tf.reduce_mean(
+                tf.reduce_sum(1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var), axis=-1)
+            )
+            total_loss = recon_loss + kl_loss
+            
+        # Backward pass gradients
+        grads = tape.gradient(total_loss, self.trainable_weights)
+        self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+        
+        # Update metrics states
+        self.total_loss_tracker.update_state(total_loss)
+        self.reconstruction_loss_tracker.update_state(recon_loss)
+        self.kl_loss_tracker.update_state(kl_loss)
+        
+        return {m.name: m.result() for m in self.metrics}
+
+# 6. Instantiate and Train the custom model
+vae = VAE(encoder, decoder)
+vae.compile(optimizer='adam')
+vae.fit(X_images, epochs=5, batch_size=128, verbose=1)
+
+# 7. Generate and display new arbitrary digits directly via the latent grid
+plt.figure(figsize=(6, 6))
+grid_x = np.linspace(-1.5, 1.5, 5)
+grid_y = np.linspace(-1.5, 1.5, 5)
+
+count = 1
+for i, yi in enumerate(grid_x):
+    for j, xi in enumerate(grid_y):
+        z_sample = np.array([[xi, yi]])
+        generated_digit = decoder.predict(z_sample, verbose=0).reshape(28, 28)
+        
+        plt.subplot(5, 5, count)
+        plt.imshow(generated_digit, cmap='gray')
+        plt.axis('off')
+        count += 1
+plt.suptitle("Generated Digit Images from Random Latent Space Coordinates")
+plt.show()
 
 
 ################################################################
-# FILE: NLP_Practice-Assignment.ipynb
-# Practice Assignment — 10th Aug
+# FILE: DLL-Task-2.ipynb
 ################################################################
 
 
 # ==============================================================
-# PRACTICE — CODE 1: SPAM/HAM CLASSIFIER (TF-IDF + NAIVE BAYES)
+# TASK 2 — Q1: DEEP FEED FORWARD NEURAL NETWORK ON MNIST
 # ==============================================================
-# Dataset: 10 messages (5 Spam, 5 Ham)
+# Dataset: MNIST
 #
 # Task:
-#   - Apply TF-IDF vectorization.
-#   - Train a Multinomial Naive Bayes model.
-#   - Print TF-IDF feature names.
-#   - Predict and display results for 3 test messages.
+#   - Build Deep FFNN (512 -> 256 -> 128 -> 10).
+#   - Train for 5 and 10 epochs.
+#   - Print train/test accuracy table and plot accuracy vs epochs.
 # ==============================================================
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+import matplotlib.pyplot as plt
 
-# Dataset
-texts = [
-    "Win a free phone now",
-    "Meeting at 10 AM",
-    "Congratulations! Claim your prize",
-    "Project discussion tomorrow",
+# Load dataset
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    # 3 new Spam messages
-    "You won a free reward",
-    "Claim your free gift now",
-    "Congratulations you won cash prize",
+# Normalize
+x_train = x_train / 255.0
+x_test = x_test / 255.0
 
-    # 3 new Ham messages
-    "Class meeting at 2 PM",
-    "Submit the project tomorrow",
-    "Please attend the lecture"
-]
+# Build Deep Feed Forward Neural Network
+model = Sequential([
+    Flatten(input_shape=(28,28)),
+    Dense(512, activation='relu'),
+    Dense(256, activation='relu'),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
 
-labels = [
-    "Spam",
-    "Ham",
-    "Spam",
-    "Ham",
-    "Spam",
-    "Spam",
-    "Spam",
-    "Ham",
-    "Ham",
-    "Ham"
-]
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-# TF-IDF
-vectorizer = TfidfVectorizer()
+epochs_list = [5, 10]
 
-X = vectorizer.fit_transform(texts)
+train_acc = []
+test_acc = []
 
-# Train model
-model = MultinomialNB()
+for ep in epochs_list:
+    print(f"\nTraining for {ep} epochs")
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=ep,
+        batch_size=64,
+        verbose=1
+    )
 
-model.fit(X, labels)
+    loss, acc = model.evaluate(x_test, y_test, verbose=0)
 
-# Display TF-IDF feature names
-print("TF-IDF Feature Names:")
-print(vectorizer.get_feature_names_out())
+    train_acc.append(history.history['accuracy'][-1])
+    test_acc.append(acc)
 
-# Test messages
-test_messages = [
-    "You won a free gift",
-    "Class meeting at 2 PM",
-    "Claim your free reward"
-]
+print("\nEpoch\tTrain Accuracy\tTest Accuracy")
+for i in range(len(epochs_list)):
+    print(f"{epochs_list[i]}\t{train_acc[i]:.4f}\t\t{test_acc[i]:.4f}")
 
-test = vectorizer.transform(test_messages)
-
-prediction = model.predict(test)
-
-# Print predictions
-print("\nPredictions:")
-
-for message, result in zip(test_messages, prediction):
-    print("Message :", message)
-    print("Prediction :", result)
-    print("-" * 50)
+plt.plot(epochs_list, test_acc, marker='o')
+plt.title("MNIST Accuracy vs Epochs")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.grid(True)
+plt.show()
 
 
 # ==============================================================
-# PRACTICE — CODE 2: MULTI-CLASS TEXT CLASSIFIER (SPORTS / TECH / EDUCATION)
+# TASK 2 — Q2: CNN WITH 2 CONVOLUTION LAYERS ON MNIST
 # ==============================================================
-# Dataset: 9 sentences across 3 categories
+# Dataset: MNIST
 #
 # Task:
-#   - Apply TF-IDF vectorization.
-#   - Train a Multinomial Naive Bayes model.
-#   - Predict category for 3 test sentences.
+#   - Build CNN with 2 Conv2D + MaxPooling layers.
+#   - Train for 5, 10, 15 epochs.
+#   - Print train/validation accuracy table and plot.
 # ==============================================================
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+import matplotlib.pyplot as plt
 
-# Dataset
-texts = [
-    # Sports
-    "The team won the cricket match",
-    "The football player scored a goal",
-    "The tennis tournament starts tomorrow",
+# Load MNIST
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    # Technology
-    "Artificial intelligence is transforming technology",
-    "New software improves computer performance",
-    "Cloud computing is used by modern companies",
+# Normalize and reshape
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
 
-    # Education
-    "Students are preparing for their final examination",
-    "The teacher explained the mathematics lesson",
-    "Students are studying for their university exams"
-]
+x_train = x_train.reshape(-1, 28, 28, 1)
+x_test = x_test.reshape(-1, 28, 28, 1)
 
-labels = [
-    "Sports",
-    "Sports",
-    "Sports",
-    "Technology",
-    "Technology",
-    "Technology",
-    "Education",
-    "Education",
-    "Education"
-]
+epochs_list = [5, 10, 15]
 
-# TF-IDF Vectorization
-vectorizer = TfidfVectorizer()
+train_acc = []
+test_acc = []
 
-X = vectorizer.fit_transform(texts)
+for ep in epochs_list:
 
-# Train MultinomialNB
-model = MultinomialNB()
+    # CNN with 2 convolution layers
+    model = Sequential([
+        Conv2D(32, (3,3), activation='relu', input_shape=(28,28,1)),
+        MaxPooling2D((2,2)),
 
-model.fit(X, labels)
+        Conv2D(64, (3,3), activation='relu'),
+        MaxPooling2D((2,2)),
 
-# Test sentences
-test_sentences = [
-    "The team won the cricket match",
-    "Artificial intelligence is transforming technology",
-    "Students are preparing for their final examination"
-]
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dense(10, activation='softmax')
+    ])
 
-test = vectorizer.transform(test_sentences)
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
 
-prediction = model.predict(test)
+    print(f"\nTraining for {ep} epochs")
 
-# Print predictions
-print("Predictions:\n")
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=ep,
+        batch_size=64,
+        validation_data=(x_test, y_test),
+        verbose=1
+    )
 
-for sentence, result in zip(test_sentences, prediction):
-    print("Sentence :", sentence)
-    print("Predicted Category :", result)
-    print("-" * 60)
+    # Store final accuracy of that epoch count
+    train_acc.append(history.history['accuracy'][-1])
+    test_acc.append(history.history['val_accuracy'][-1])
+
+
+# Display accuracy for each epoch setting
+print("\nEpoch\tTrain Accuracy\tValidation Accuracy")
+
+for i in range(len(epochs_list)):
+    print(f"{epochs_list[i]}\t{train_acc[i]:.4f}\t\t{test_acc[i]:.4f}")
+
+
+# Plot accuracy vs epochs
+plt.plot(epochs_list, test_acc, marker='o', label='Validation Accuracy')
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.title("MNIST CNN Accuracy vs Epochs")
+plt.legend()
+plt.grid(True)
+plt.show()
 
 
 # ==============================================================
-# PRACTICE — CODE 3: SPAM/HAM CLASSIFIER WITH SPAM/HAM COUNTS
+# TASK 2 — Q3: CNN WITH 4 CONVOLUTION LAYERS — MNIST vs FASHION-MNIST
 # ==============================================================
-# Dataset: 10 messages (5 Spam, 5 Ham)
+# Dataset: MNIST, Fashion-MNIST
 #
 # Task:
-#   - Apply TF-IDF vectorization.
-#   - Train a Multinomial Naive Bayes model.
-#   - Predict and display results for 10 test messages.
-#   - Count and print total Spam and Ham predictions.
+#   - Build CNN with 4 Conv2D layers + Dropout.
+#   - Train for 5, 10, 20 epochs on both datasets.
+#   - Print test accuracy and training time table, plot accuracy vs epochs.
 # ==============================================================
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.datasets import mnist, fashion_mnist
+import matplotlib.pyplot as plt
+import time
 
-# Spam/Ham Dataset
-texts = [
-    "Win a free phone now",
-    "Meeting at 10 AM",
-    "Congratulations! Claim your prize",
-    "Project discussion tomorrow",
-    "You won a free reward",
-    "Claim your free gift now",
-    "Congratulations you won cash prize",
-    "Class meeting at 2 PM",
-    "Submit the project tomorrow",
-    "Please attend the lecture"
+
+# CNN Model (4 Convolution Layers)
+def create_cnn_model():
+
+    model = Sequential([
+
+        Conv2D(32, (3,3), activation='relu', padding='same', input_shape=(28,28,1)),
+        Conv2D(32, (3,3), activation='relu', padding='same'),
+        MaxPooling2D((2,2)),
+
+        Conv2D(64, (3,3), activation='relu', padding='same'),
+        Conv2D(64, (3,3), activation='relu', padding='same'),
+        MaxPooling2D((2,2)),
+
+        Flatten(),
+
+        Dense(128, activation='relu'),
+        Dropout(0.3),
+
+        Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    return model
+
+
+epochs_list = [5, 10, 20]
+
+datasets = [
+    ("MNIST", mnist.load_data()),
+    ("Fashion MNIST", fashion_mnist.load_data())
 ]
 
-labels = [
-    "Spam",
-    "Ham",
-    "Spam",
-    "Ham",
-    "Spam",
-    "Spam",
-    "Spam",
-    "Ham",
-    "Ham",
-    "Ham"
+
+for dataset_name, data in datasets:
+
+    print("\n=====================================")
+    print("Dataset :", dataset_name)
+    print("=====================================")
+
+    (x_train, y_train), (x_test, y_test) = data
+
+    # Normalize
+    x_train = x_train.astype("float32") / 255.0
+    x_test = x_test.astype("float32") / 255.0
+
+    # Reshape
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
+
+    accuracy_values = []
+    time_values = []
+
+    for ep in epochs_list:
+
+        print("\nTraining for", ep, "epochs")
+
+        model = create_cnn_model()
+
+        start = time.time()
+
+        model.fit(
+            x_train,
+            y_train,
+            epochs=ep,
+            batch_size=64,
+            validation_split=0.1,
+            verbose=1
+        )
+
+        end = time.time()
+
+        loss, acc = model.evaluate(x_test, y_test, verbose=0)
+
+        accuracy_values.append(acc)
+        time_values.append(end - start)
+
+        print("Accuracy :", round(acc * 100, 2), "%")
+        print("Time :", round(end - start, 2), "seconds")
+
+    print("\nResults for", dataset_name)
+    print("-----------------------------------------------")
+    print("Epochs\tAccuracy (%)\tTime (sec)")
+
+    for ep, acc, t in zip(epochs_list, accuracy_values, time_values):
+        print(f"{ep}\t{acc*100:.2f}\t\t{t:.2f}")
+
+    plt.figure(figsize=(6,4))
+    plt.plot(epochs_list, accuracy_values, marker='o')
+    plt.xlabel("Number of Epochs")
+    plt.ylabel("Test Accuracy")
+    plt.title(dataset_name + " Accuracy vs Epochs")
+    plt.grid(True)
+    plt.show()
+
+
+# ==============================================================
+# TASK 2 — Q4: CNN WITH BATCH NORMALIZATION — MNIST vs FASHION-MNIST
+# ==============================================================
+# Dataset: MNIST, Fashion-MNIST
+#
+# Task:
+#   - Build 4-conv CNN with BatchNormalization after each conv.
+#   - Train for 5, 10, 15 epochs on both datasets.
+#   - Print accuracy table and plot accuracy vs epochs.
+# ==============================================================
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from tensorflow.keras.layers import Flatten, Dense, Dropout
+from tensorflow.keras.datasets import mnist, fashion_mnist
+import matplotlib.pyplot as plt
+
+# CNN Model
+def create_model():
+
+    model = Sequential([
+
+        Conv2D(32, (3,3), padding='same', activation='relu', input_shape=(28,28,1)),
+        BatchNormalization(),
+
+        Conv2D(32, (3,3), padding='same', activation='relu'),
+        BatchNormalization(),
+        MaxPooling2D((2,2)),
+
+        Conv2D(64, (3,3), padding='same', activation='relu'),
+        BatchNormalization(),
+
+        Conv2D(64, (3,3), padding='same', activation='relu'),
+        BatchNormalization(),
+        MaxPooling2D((2,2)),
+
+        Flatten(),
+
+        Dense(128, activation='relu'),
+        Dropout(0.3),
+
+        Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    return model
+
+
+epochs_list = [5, 10, 15]
+
+datasets = [
+    ("MNIST", mnist.load_data()),
+    ("Fashion MNIST", fashion_mnist.load_data())
 ]
 
-# TF-IDF
-vectorizer = TfidfVectorizer()
 
-X = vectorizer.fit_transform(texts)
+for dataset_name, data in datasets:
 
-# Train model
-model = MultinomialNB()
+    print("\n======================================")
+    print("Dataset :", dataset_name)
+    print("======================================")
 
-model.fit(X, labels)
+    (x_train, y_train), (x_test, y_test) = data
 
-# Test messages
-test_messages = [
-    "Win a free lottery ticket",
-    "Project meeting at 11 AM",
-    "Congratulations, you won a prize",
-    "Submit your assignment tomorrow",
-    "Claim your free phone",
-    "Lecture starts at 9 AM",
-    "Get a free reward now",
-    "Discuss the project with your team",
-    "You have won a cash prize",
-    "Please attend the meeting"
+    # Normalize
+    x_train = x_train.astype("float32") / 255.0
+    x_test = x_test.astype("float32") / 255.0
+
+    # Reshape
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
+
+    accuracy_list = []
+
+    for ep in epochs_list:
+
+        print("\nTraining for", ep, "epochs")
+
+        model = create_model()
+
+        model.fit(
+            x_train,
+            y_train,
+            epochs=ep,
+            batch_size=64,
+            validation_split=0.1,
+            verbose=1
+        )
+
+        loss, acc = model.evaluate(x_test, y_test, verbose=0)
+
+        accuracy_list.append(acc)
+
+        print("Test Accuracy :", round(acc * 100, 2), "%")
+
+    print("\nAccuracy Table")
+    print("-------------------------------")
+    print("Epochs\tAccuracy (%)")
+
+    for ep, acc in zip(epochs_list, accuracy_list):
+        print(f"{ep}\t{acc*100:.2f}")
+
+    plt.figure(figsize=(6,4))
+    plt.plot(epochs_list, accuracy_list, marker='o')
+    plt.title(dataset_name + " Accuracy vs Epochs")
+    plt.xlabel("Epochs")
+    plt.ylabel("Test Accuracy")
+    plt.grid(True)
+    plt.show()
+
+
+# ==============================================================
+# TASK 2 — Q5: REGULARIZATION COMPARISON (BASE / L1 / L2 / DROPOUT / L2 + DROPOUT)
+# ==============================================================
+# Dataset: Fashion-MNIST
+#
+# Task:
+#   - Build 4-conv CNN with selected regularization.
+#   - Train each model for 10 epochs.
+#   - Print training vs test accuracy table (DataFrame).
+# ==============================================================
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Flatten, Dense, Dropout
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.regularizers import l1, l2
+import pandas as pd
+
+# Load Fashion-MNIST
+(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+# Normalize
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
+
+# Reshape
+x_train = x_train.reshape(-1,28,28,1)
+x_test = x_test.reshape(-1,28,28,1)
+
+
+def create_model(model_type):
+
+    if model_type == "Base":
+        reg = None
+        drop = 0
+
+    elif model_type == "L1":
+        reg = l1(0.001)
+        drop = 0
+
+    elif model_type == "L2":
+        reg = l2(0.001)
+        drop = 0
+
+    elif model_type == "Dropout":
+        reg = None
+        drop = 0.5
+
+    elif model_type == "L2 + Dropout":
+        reg = l2(0.001)
+        drop = 0.5
+
+    model = Sequential()
+
+    # 4 Convolution Layers
+    model.add(Conv2D(32,(3,3),padding='same',
+                     activation='relu',
+                     kernel_regularizer=reg,
+                     input_shape=(28,28,1)))
+
+    model.add(Conv2D(32,(3,3),padding='same',
+                     activation='relu',
+                     kernel_regularizer=reg))
+
+    model.add(MaxPooling2D((2,2)))
+
+    model.add(Conv2D(64,(3,3),padding='same',
+                     activation='relu',
+                     kernel_regularizer=reg))
+
+    model.add(Conv2D(64,(3,3),padding='same',
+                     activation='relu',
+                     kernel_regularizer=reg))
+
+    model.add(MaxPooling2D((2,2)))
+
+    model.add(Flatten())
+
+    model.add(Dense(128,
+                    activation='relu',
+                    kernel_regularizer=reg))
+
+    if drop > 0:
+        model.add(Dropout(drop))
+
+    model.add(Dense(10, activation='softmax'))
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    return model
+
+
+models = [
+    "Base",
+    "L1",
+    "L2",
+    "Dropout",
+    "L2 + Dropout"
 ]
 
-# Transform test messages
-test = vectorizer.transform(test_messages)
+results = []
+
+for m in models:
+
+    print("\n===========================")
+    print("Training:", m)
+    print("===========================")
+
+    model = create_model(m)
+
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=10,
+        batch_size=64,
+        validation_split=0.1,
+        verbose=1
+    )
+
+    train_acc = history.history["accuracy"][-1]
+
+    loss, test_acc = model.evaluate(
+        x_test,
+        y_test,
+        verbose=0
+    )
+
+    results.append([
+        m,
+        round(train_acc*100,2),
+        round(test_acc*100,2)
+    ])
+
+print("\nFinal Result")
+print("----------------------------------------------")
+print("Model\t\tTraining Accuracy\tTest Accuracy")
+
+for r in results:
+    print(f"{r[0]:15} {r[1]:8}%\t\t{r[2]:8}%")
+
+df = pd.DataFrame(
+    results,
+    columns=["Model","Training Accuracy (%)","Test Accuracy (%)"]
+)
+
+print("\n")
+print(df)
+
+
+# ==============================================================
+# TASK 2 — Q6: DATA AUGMENTATION ON FASHION-MNIST
+# ==============================================================
+# Dataset: Fashion-MNIST
+#
+# Task:
+#   - Apply ImageDataGenerator (rotation, shift, flip).
+#   - Train CNN for 5, 10, 20 epochs with augmented data.
+#   - Print accuracy and time table, plot accuracy vs epochs.
+# ==============================================================
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
+import time
+
+# Load Fashion-MNIST
+(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+# Normalize
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
+
+# Reshape
+x_train = x_train.reshape(-1, 28, 28, 1)
+x_test = x_test.reshape(-1, 28, 28, 1)
+
+# Data Augmentation
+datagen = ImageDataGenerator(
+    rotation_range=10,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True
+)
+datagen.fit(x_train)
+
+
+def create_model():
+    model = Sequential([
+        Conv2D(32, (3,3), activation='relu', padding='same', input_shape=(28,28,1)),
+        MaxPooling2D((2,2)),
+        Conv2D(64, (3,3), activation='relu', padding='same'),
+        MaxPooling2D((2,2)),
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.3),
+        Dense(10, activation='softmax')
+    ])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+epochs_list = [5, 10, 20]
+accuracy_list = []
+time_list = []
+
+for ep in epochs_list:
+    print(f"\nTraining for {ep} epochs (with Data Augmentation)")
+    model = create_model()
+
+    start = time.time()
+    model.fit(
+        datagen.flow(x_train, y_train, batch_size=64),
+        epochs=ep,
+        validation_data=(x_test, y_test),
+        verbose=1
+    )
+    end = time.time()
+
+    loss, acc = model.evaluate(x_test, y_test, verbose=0)
+    accuracy_list.append(acc)
+    time_list.append(end - start)
+
+    print(f"Test Accuracy: {acc*100:.2f}%")
+    print(f"Time: {end-start:.2f} seconds")
+
+print("\nAccuracy Table")
+print("-------------------------------")
+print("Epochs\tAccuracy (%)\tTime (sec)")
+for ep, acc, t in zip(epochs_list, accuracy_list, time_list):
+    print(f"{ep}\t{acc*100:.2f}\t\t{t:.2f}")
+
+plt.figure(figsize=(6,4))
+plt.plot(epochs_list, accuracy_list, marker='o')
+plt.title("Fashion MNIST (Data Augmentation) - Accuracy vs Epochs")
+plt.xlabel("Epochs")
+plt.ylabel("Test Accuracy")
+plt.grid(True)
+plt.show()
+
+
+# ==============================================================
+# TASK 2 — Q7: CNN PARAMETERS & COMPUTATIONS (MACs) CALCULATION
+# ==============================================================
+# Input: 224x224x3 | Filters m=16 | Kernel k=3 | Dense n=128 | Classes=10
+#
+# Task:
+#   - Build CNN with 5 x (Conv -> ReLU -> MaxPool) + Dense layers.
+#   - Display model summary.
+#   - Manually calculate total computations (MACs) and parameters.
+# ==============================================================
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Activation, Flatten, Dense
+
+# Parameters
+input_shape = (224, 224, 3)
+num_classes = 10
+m = 16                    # Number of filters
+k = 3                     # Filter size
+n = 128                   # Dense layer neurons
+activation_function = 'relu'
+
+# Build CNN
+model = Sequential()
+
+for i in range(5):
+    if i == 0:
+        model.add(Conv2D(m, (k, k), input_shape=input_shape, padding='same'))
+    else:
+        model.add(Conv2D(m, (k, k), padding='same'))
+    model.add(Activation(activation_function))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Flatten())
+model.add(Dense(n))
+model.add(Activation(activation_function))
+model.add(Dense(num_classes))
+model.add(Activation('softmax'))
+
+# Display model
+model.summary()
+
+# --------------------------------------------------
+# Calculations
+# --------------------------------------------------
+
+# After 5 max-pooling layers:
+# 224 -> 112 -> 56 -> 28 -> 14 -> 7
+flatten_size = 7 * 7 * m
+
+# Computations (MACs)
+conv1_computations = 224 * 224 * 3 * k * k * m
+conv2_computations = 112 * 112 * m * k * k * m
+conv3_computations = 56 * 56 * m * k * k * m
+conv4_computations = 28 * 28 * m * k * k * m
+conv5_computations = 14 * 14 * m * k * k * m
+
+dense_computations = flatten_size * n
+output_computations = n * num_classes
+
+total_computations = (
+    conv1_computations +
+    conv2_computations +
+    conv3_computations +
+    conv4_computations +
+    conv5_computations +
+    dense_computations +
+    output_computations
+)
+
+# Parameters
+conv1_parameters = (k * k * 3 * m) + m
+conv2_parameters = (k * k * m * m) + m
+conv3_parameters = (k * k * m * m) + m
+conv4_parameters = (k * k * m * m) + m
+conv5_parameters = (k * k * m * m) + m
+
+dense_parameters = (flatten_size * n) + n
+output_parameters = (n * num_classes) + num_classes
+
+total_parameters = (
+    conv1_parameters +
+    conv2_parameters +
+    conv3_parameters +
+    conv4_parameters +
+    conv5_parameters +
+    dense_parameters +
+    output_parameters
+)
+
+# Print results
+print("\n--- CNN Calculations ---")
+print("Input Shape :", input_shape)
+print("Filters (m) :", m)
+print("Filter Size (k x k) :", k, "x", k)
+print("Dense Neurons (n) :", n)
+
+print("\nTotal Computations (MACs) :", total_computations)
+print("Total Parameters :", total_parameters)
+
+
+################################################################
+# FILE: DLL_Task-3.ipynb
+################################################################
+
+
+# ==============================================================
+# TASK 3 — Q1: SIMPLE RNN FOR IMDB SENTIMENT ANALYSIS
+# ==============================================================
+# Question:
+#   1. Using the IMDB Movie Reviews dataset, perform word indexing and sequence padding,
+#   then implement a Simple RNN for binary sentiment analysis. Display the actual and
+#   predicted sentiment for sample reviews.
+#
+# Dataset: IMDB Movie Reviews
+#
+# Task:
+#   - Word indexing (num_words=10000) and sequence padding (maxlen=300).
+#   - Build Embedding -> SimpleRNN -> Dense(sigmoid).
+#   - Print test accuracy and actual vs predicted sentiment for 10 reviews.
+# ==============================================================
+
+import tensorflow as tf
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
+
+# Parameters
+vocab_size = 10000
+max_len = 300
+
+# Load IMDB
+(x_train, y_train), (x_test, y_test) = imdb.load_data(
+    num_words=vocab_size
+)
+
+# Padding
+x_train = pad_sequences(
+    x_train,
+    maxlen=max_len,
+    padding='post'
+)
+
+x_test = pad_sequences(
+    x_test,
+    maxlen=max_len,
+    padding='post'
+)
+
+print("X train:", x_train.shape)
+print("X test:", x_test.shape)
+
+# Model
+model = Sequential([
+    Embedding(input_dim=vocab_size, output_dim=64),
+    SimpleRNN(64),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train
+history = model.fit(
+    x_train,
+    y_train,
+    epochs=5,
+    batch_size=64,
+    validation_split=0.2,
+    verbose=1
+)
+
+# Test
+loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+print("Test Accuracy:", accuracy)
 
 # Predictions
-prediction = model.predict(test)
+predictions = model.predict(x_test[:10])
 
-# Print predictions
-print("Spam/Ham Predictions")
-print("=" * 60)
+print("\nActual vs Predicted:")
 
-for i, (message, result) in enumerate(zip(test_messages, prediction), 1):
-    print(i, ".", message)
-    print("   Prediction :", result)
-    print("-" * 60)
+for i in range(10):
+    actual = "Positive" if y_test[i] == 1 else "Negative"
+    predicted = "Positive" if predictions[i][0] >= 0.5 else "Negative"
 
-# Count Spam and Ham
-spam_count = sum(prediction == "Spam")
-ham_count = sum(prediction == "Ham")
+    print(
+        f"Review {i+1}: "
+        f"Actual = {actual}, "
+        f"Predicted = {predicted}"
+    )
 
-print("\nTotal Spam Messages :", spam_count)
-print("Total Ham Messages  :", ham_count)
+
+# ==============================================================
+# TASK 3 — Q2: SIMPLE RNN TO PREDICT NEXT VALUE IN SEQUENCE
+# ==============================================================
+# Question:
+#   2. Create a simple numerical sequence dataset and implement a Simple RNN to predict the
+#   next value in a sequence.
+#
+# Dataset: Numbers 1 to 100
+#
+# Task:
+#   - Normalise data and create sequences (5 values -> next value).
+#   - Train SimpleRNN regression model.
+#   - Predict next value for [1, 2, 3, 4, 5].
+# ==============================================================
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+
+# Create data
+data = np.arange(1, 101, dtype=float)
+
+# Normalize data
+mean = data.mean()
+std = data.std()
+
+data_scaled = (data - mean) / std
+
+# Create sequences
+seq_length = 5
+
+X = []
+y = []
+
+for i in range(len(data_scaled) - seq_length):
+    X.append(data_scaled[i:i + seq_length])
+    y.append(data_scaled[i + seq_length])
+
+X = np.array(X)
+y = np.array(y)
+
+# Reshape for RNN
+X = X.reshape((X.shape[0], X.shape[1], 1))
+
+print("X shape:", X.shape)
+print("y shape:", y.shape)
+
+# Build model
+model = Sequential([
+    SimpleRNN(32, activation='tanh', input_shape=(5, 1)),
+    Dense(1)
+])
+
+model.compile(
+    optimizer='adam',
+    loss='mse'
+)
+
+# Train
+model.fit(
+    X,
+    y,
+    epochs=200,
+    batch_size=16,
+    verbose=0
+)
+
+# Test with EXACTLY 5 values
+test_sequence = np.array([1, 2, 3, 4, 5], dtype=float)
+
+# Normalize test data using same mean/std
+test_scaled = (test_sequence - mean) / std
+
+# Reshape
+test_scaled = test_scaled.reshape(1, 5, 1)
+
+# Predict
+prediction_scaled = model.predict(test_scaled, verbose=0)
+
+# Convert prediction back to original scale
+prediction = prediction_scaled[0][0] * std + mean
+
+print("\nInput sequence:", test_sequence.astype(int))
+print("Predicted next value:", round(prediction, 2))
+
+
+# ==============================================================
+# TASK 3 — Q3: LSTM — DELHI CLIMATE NEXT-DAY TEMPERATURE
+# ==============================================================
+# Question:
+#   3. Implement an LSTM model to predict the next day's mean temperature using the previous
+#   5 days' temperatures from the Delhi Climate dataset. Use the training data for training
+#   and test data for prediction. Display the actual and predicted temperature for one test
+#   sample.
+#
+# Dataset: DailyDelhiClimateTrain.csv (meantemp)
+#
+# Task:
+#   - Create sequences (previous 5 days -> next day).
+#   - Split 80% train / 20% test.
+#   - Train LSTM and display actual vs predicted temperature for one sample.
+# ==============================================================
+
+import pandas as pd
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+# 1. Load dataset
+df = pd.read_csv("/home/student/Downloads/DailyDelhiClimateTrain.csv")
+
+print(df.head())
+print(df.columns)
+
+# 2. Select mean temperature
+temperature = df["meantemp"].values
+
+# 3. Create sequences using previous 5 days
+X = []
+y = []
+
+for i in range(5, len(temperature)):
+    X.append(temperature[i-5:i])
+    y.append(temperature[i])
+
+X = np.array(X)
+y = np.array(y)
+
+# 4. Split into training and testing data
+# Use first 80% for training and remaining 20% for testing
+split = int(0.8 * len(X))
+
+X_train = X[:split]
+y_train = y[:split]
+
+X_test = X[split:]
+y_test = y[split:]
+
+# 5. Reshape for LSTM
+# (samples, time steps, features)
+X_train = X_train.reshape(X_train.shape[0], 5, 1)
+X_test = X_test.reshape(X_test.shape[0], 5, 1)
+
+print("Training shape:", X_train.shape)
+print("Testing shape:", X_test.shape)
+
+# 6. Build LSTM model
+model = Sequential([
+    LSTM(50, input_shape=(5, 1)),
+    Dense(1)
+])
+
+# 7. Compile
+model.compile(
+    optimizer="adam",
+    loss="mse"
+)
+
+# 8. Train
+model.fit(
+    X_train,
+    y_train,
+    epochs=20,
+    batch_size=32,
+    verbose=1
+)
+
+# 9. Predict test data
+predictions = model.predict(X_test)
+
+# 10. Display one test sample
+sample = 0
+
+print("\nPrevious 5 days temperatures:")
+print(X_test[sample].flatten())
+
+print("Actual next-day temperature:",
+      y_test[sample])
+
+print("Predicted next-day temperature:",
+      predictions[sample][0])
+
+
+# ==============================================================
+# TASK 3 — Q4: LSTM — MONTHLY MILK PRODUCTION PREDICTION
+# ==============================================================
+# Question:
+#   4. Implement an LSTM model to predict the next month's milk production using the
+#   previous 5 months' production values. Display the actual and predicted production for
+#   one sample.
+#
+# Dataset: monthly-milk-production-pounds.csv
+#
+# Task:
+#   - Clean and normalise data, create sequences (5 months -> next month).
+#   - Split 80% train / 20% test.
+#   - Train LSTM and display actual vs predicted production for one sample.
+# ==============================================================
+
+import pandas as pd
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+# Load dataset
+df = pd.read_csv("/home/student/Downloads/monthly-milk-production-pounds.csv")
+
+# Keep only Price column and remove missing values
+df["Price"] = pd.to_numeric(df["Price"], errors="coerce")
+df = df.dropna(subset=["Price"])
+
+# Get price values
+data = df["Price"].values.astype(float)
+
+print("Number of records:", len(data))
+print("First 10 prices:", data[:10])
+print("Any NaN:", np.isnan(data).any())
+
+# --------------------------------
+# Normalize
+# --------------------------------
+mean = data.mean()
+std = data.std()
+
+data_scaled = (data - mean) / std
+
+# --------------------------------
+# Create sequences
+# 5 months -> next month
+# --------------------------------
+X = []
+y = []
+
+for i in range(5, len(data_scaled)):
+    X.append(data_scaled[i-5:i])
+    y.append(data_scaled[i])
+
+X = np.array(X)
+y = np.array(y)
+
+# --------------------------------
+# Train-test split
+# --------------------------------
+split = int(0.8 * len(X))
+
+X_train = X[:split]
+y_train = y[:split]
+
+X_test = X[split:]
+y_test = y[split:]
+
+# Reshape
+X_train = X_train.reshape(-1, 5, 1)
+X_test = X_test.reshape(-1, 5, 1)
+
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
+
+# --------------------------------
+# LSTM model
+# --------------------------------
+model = Sequential([
+    LSTM(50, input_shape=(5, 1)),
+    Dense(1)
+])
+
+model.compile(
+    optimizer="adam",
+    loss="mse"
+)
+
+# Train
+model.fit(
+    X_train,
+    y_train,
+    epochs=100,
+    batch_size=8,
+    verbose=1
+)
+
+# --------------------------------
+# Predict
+# --------------------------------
+pred_scaled = model.predict(X_test, verbose=0)
+
+# Convert back to original values
+predictions = pred_scaled * std + mean
+actual = y_test * std + mean
+
+# --------------------------------
+# Display one sample
+# --------------------------------
+sample = 0
+
+previous_prices = X_test[sample].flatten() * std + mean
+
+print("\nPrevious 5 months prices:")
+print(np.round(previous_prices, 2))
+
+print("\nActual next month price:")
+print(round(actual[sample], 2))
+
+print("Predicted next month price:")
+print(round(predictions[sample][0], 2))
